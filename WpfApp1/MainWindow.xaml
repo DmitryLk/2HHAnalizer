@@ -36,12 +36,13 @@
         <!--</WrapPanel>-->
 
         <TabControl HorizontalAlignment="Left" Height="424" Margin="21,32,0,0" VerticalAlignment="Top" Width="809">
-            <TabItem Header="TabItem">
+            <TabItem Header="Grid">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox x:Name="TextBox2" HorizontalAlignment="Right" Height="376" Margin="0,10,10,0" Text="TextBox" VerticalAlignment="Top" Width="784" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" AcceptsReturn="True"/>
+                    <DataGrid x:Name="MyGrid" AutoGenerateColumns="True" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="TabItem">
+          
+            <TabItem Header="Stat">
                 <Grid Background="#FFE5E5E5">
                     <ListView x:Name="listbox1" HorizontalAlignment="Left" Height="344" Margin="67,25,0,0" VerticalAlignment="Top" Width="270" ItemsSource="{Binding yap}" >
                         <ListView.View>
@@ -62,30 +63,20 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <ListView x:Name="listbox2" HorizontalAlignment="Left" Height="344" Margin="437,25,0,0" VerticalAlignment="Top" Width="270" >
-                        <ListView.View>
-                            <GridView AllowsColumnReorder="true" >
-                                <GridViewColumn Width="100">
-                                    <GridViewColumnHeader Tag="Name"/>
-                                </GridViewColumn>
-
-
-                                <GridViewColumn Width="60">
-                                    <GridViewColumnHeader Tag="count"/>
-                                </GridViewColumn>
-
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
                 </Grid>
             </TabItem>
-            <TabItem Header="TabItem">
+            <TabItem Header="Browser">
                 <Grid Background="#FFE5E5E5">
                     <WebBrowser x:Name="WebBrowser" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadCompleted="WebBrowser_LoadCompleted"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="html">
+                <Grid Background="#FFE5E5E5">
+                    <TextBox x:Name="TextBox2" HorizontalAlignment="Right" Height="376" Margin="0,10,10,0" Text="TextBox" VerticalAlignment="Top" Width="784" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </Grid>
+            </TabItem>
         </TabControl>
-        
+
         <!--<ProgressBar x:Name="PB" Template="{StaticResource customTemplate}" HorizontalAlignment="Left" Height="45" Margin="389,16,0,0" VerticalAlignment="Top" Width="404" BorderThickness="2" Grid.ColumnSpan="2"></ProgressBar>-->
 
         <!--<WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10">

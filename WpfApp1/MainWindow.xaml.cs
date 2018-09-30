@@ -152,8 +152,13 @@ namespace WpfApp1
         {
             TextBox2.Text = answer;
 
-            foreach (Record key in spisok)
-                listbox2.Items.Add(key.Name);
+            //MyGrid.Items = new List<Record>();
+            //foreach (var item in itemsToAdd)
+            //{
+            //    MyGrid.Items.Add(item);
+            //}
+
+            MyGrid.ItemsSource = spisok;
         }
 
         private void Button3_Click(object sender, RoutedEventArgs e)
