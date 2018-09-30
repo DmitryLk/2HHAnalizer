@@ -144,19 +144,14 @@ namespace WpfApp1
             Binding binding = new Binding();
             listbox1.SetBinding(ListBox.ItemsSourceProperty, binding);
             listbox1.DataContext = yap;
-            
-
+   
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             TextBox2.Text = answer;
 
-            //MyGrid.Items = new List<Record>();
-            //foreach (var item in itemsToAdd)
-            //{
-            //    MyGrid.Items.Add(item);
-            //}
+          
 
             MyGrid.ItemsSource = spisok;
         }
