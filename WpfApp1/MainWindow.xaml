@@ -1,0 +1,99 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="511.796" Width="968.079">
+    <Window.Resources>
+
+        <!--<local:MainWindow x:Key="myDataSource" x:Name="PBprc"/>-->
+
+    </Window.Resources>
+
+
+    <Grid Margin="0,0,3.6,0.4">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="0*"/>
+        </Grid.ColumnDefinitions>
+        <TextBox x:Name="TextBox1" Template="{StaticResource TextBoxBaseControlTemplate}" HorizontalAlignment="Left" Height="18" Margin="21,10,0,0" TextWrapping="Wrap" Text="https://krasnodar.hh.ru/catalog/Informacionnye-tehnologii-Internet-Telekom/Programmirovanie-Razrabotka" VerticalAlignment="Top" Width="800"/>
+        <!--<Button x:Name="Button2" Content="Button" HorizontalAlignment="Left" Margin="150,32,0,0" VerticalAlignment="Top" Width="75" Click="Button2_Click" RenderTransformOrigin="3.659,-6.23" Height="18" FontFamily="Verdana" Foreground="White" Background="Black"/>-->
+        <Button x:Name="Button3" Content="Check HH" HorizontalAlignment="Left" Margin="846,13,0,0" VerticalAlignment="Top" Width="93" Click="Button3_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
+        <Button x:Name="Button5" Content="LoadFromXLS"  HorizontalAlignment="Left" Margin="846,45,0,0" VerticalAlignment="Top" Width="93" Click="Button5_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
+        <Button x:Name="Button1" Content="Analize"  HorizontalAlignment="Left" Margin="846,78,0,0" VerticalAlignment="Top" Width="93" Click="Button1_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
+
+        <!--<WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,0">-->
+        <ProgressBar x:Name="PB"  Height="17" Background ="White" HorizontalAlignment="Left" Margin="223,33,0,0" VerticalAlignment="Top" Width="598" BorderThickness="2"/>
+        <!--<TextBlock Text="{Binding ElementName=MainWindow, Path=PBprc, StringFormat={}{00:0}%}" Width="50" VerticalAlignment="Center" Margin="443,37,0,421.4" HorizontalAlignment="Left" Height="24" />-->
+        <!--<TextBlock Text="{Binding ElementName=PB, Path=Value, StringFormat={}{00:0}%}" Width="50" VerticalAlignment="Center" Margin="508,37,0,421" HorizontalAlignment="Left" Height="24" />-->
+        <TextBlock x:Name="PBtext" Text="{Binding Pbprc, StringFormat={}{00:0}%}" Width="50" VerticalAlignment="Center" Margin="508,37,0,421" HorizontalAlignment="Left" Height="24" />
+        <!--"{Binding Name}"-->
+
+
+        <!--<TextBlock Text="{Binding ElementName=PB, Path=Value, StringFormat={}{00:0}%}" HorizontalAlignment="Center" Width="50" VerticalAlignment="Center" Margin="494,32,176.8,434.4" />-->
+        <!--</WrapPanel>-->
+
+        <TabControl HorizontalAlignment="Left" Height="424" Margin="21,32,0,0" VerticalAlignment="Top" Width="809">
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5">
+                    <TextBox x:Name="TextBox2" HorizontalAlignment="Right" Height="376" Margin="0,10,10,0" Text="TextBox" VerticalAlignment="Top" Width="784" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5">
+                    <ListView x:Name="listbox1" HorizontalAlignment="Left" Height="344" Margin="67,25,0,0" VerticalAlignment="Top" Width="270" ItemsSource="{Binding yap}" >
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="true" >
+                                <GridViewColumn Width="100" DisplayMemberBinding="{Binding Name}">
+                                    <GridViewColumn.Header>
+                                        <GridViewColumnHeader Tag="Name" Click="LBColumnHeader_Click">Name</GridViewColumnHeader>
+                                    </GridViewColumn.Header>
+                                </GridViewColumn>
+
+
+                                <GridViewColumn Width="60" DisplayMemberBinding="{Binding count}">
+                                    <GridViewColumn.Header>
+                                        <GridViewColumnHeader Tag="count" Click="LBColumnHeader_Click">count</GridViewColumnHeader>
+                                    </GridViewColumn.Header>
+                                </GridViewColumn>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <ListView x:Name="listbox2" HorizontalAlignment="Left" Height="344" Margin="437,25,0,0" VerticalAlignment="Top" Width="270" >
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="true" >
+                                <GridViewColumn Width="100">
+                                    <GridViewColumnHeader Tag="Name"/>
+                                </GridViewColumn>
+
+
+                                <GridViewColumn Width="60">
+                                    <GridViewColumnHeader Tag="count"/>
+                                </GridViewColumn>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5">
+                    <WebBrowser x:Name="WebBrowser" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadCompleted="WebBrowser_LoadCompleted"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        
+        <!--<ProgressBar x:Name="PB" Template="{StaticResource customTemplate}" HorizontalAlignment="Left" Height="45" Margin="389,16,0,0" VerticalAlignment="Top" Width="404" BorderThickness="2" Grid.ColumnSpan="2"></ProgressBar>-->
+
+        <!--<WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10">
+            <ProgressBar Name="ProgressBarForProgress" Minimum="0" Maximum="100" Height="30" Width="500"></ProgressBar>
+            <TextBlock Text="{Binding ElementName=ProgressBarForProgress, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" Width="50" VerticalAlignment="Center" />
+        </WrapPanel>-->
+
+    </Grid>
+
+
+</Window>
