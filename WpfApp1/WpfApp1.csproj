@@ -93,14 +93,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CodeFile1.cs" />
-    <Compile Include="Controller.cs" />
-    <Compile Include="Loader.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model.cs" />
+    <Compile Include="Presentier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

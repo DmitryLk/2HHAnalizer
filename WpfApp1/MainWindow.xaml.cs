@@ -51,20 +51,19 @@ namespace WpfApp1
         }
     }
 
-    interface IMyWindow
+    public interface IView
     {
         string WebString { get; set; }
         double PBmax { get;  set; }
         WebBrowser wb { get; }
     }
 
-    public partial class MainWindow : Window, IMyWindow
+    public partial class MainWindow : Window, IView
     {
-        private GridViewColumnHeader listViewSortCol = null;
-        private SortAdorner listViewSortAdorner = null;
 
-        MyController Ctrl;
-        ILoader xlsloader;
+
+        private IPresentier Presentier;
+        private IModel Model;
 
 
         public string WebString
@@ -89,8 +88,15 @@ namespace WpfApp1
         public MainWindow() 
         {
             InitializeComponent();
-            Ctrl = new MyController(this);
-            xlsloader = new FromXLSLoader(this);
+
+            Model = new MyModel(this);
+            Presentier = new MyPresentier(this, Model);
+ 
+            Button4.Click += Presentier.NavigateEv;
+            Button4.Click += new RoutedEventHandler(Button4_Click);
+            Button4.AddHandler(Button.ClickEvent, new RoutedEventHandler(Button4_Click));
+
+
         }
 
         BackgroundWorker worker;
@@ -131,7 +137,6 @@ namespace WpfApp1
         }
 
 
-
         private void Button3_Click(object sender, RoutedEventArgs e)  //CheckHH
         {
             Ctrl.Navigate();
@@ -158,6 +163,8 @@ namespace WpfApp1
 
 
 
+        private GridViewColumnHeader listViewSortCol = null;
+        private SortAdorner listViewSortAdorner = null;
         private void LBColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             GridViewColumnHeader column = (sender as GridViewColumnHeader);

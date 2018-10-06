@@ -15,13 +15,13 @@ using Microsoft.Win32;
 
 namespace WpfApp1
 {
-    public interface ILoader
+    public interface IModel
     {
         void Load(IList<Record> r);
     }
 
 
-    class FromXLSLoader : ILoader
+    class MyModel : IModel
     {
         Excel.Application excelApp;
         Excel.Workbook workBook;
@@ -30,10 +30,10 @@ namespace WpfApp1
         Process[] excelProcsOld;
 
 
-        private readonly IMyWindow form;
-        public FromXLSLoader(IMyWindow form)
+        private readonly IView View;
+        public MyModel(IView View)
         {
-            this.form = form;
+            this.View = View;
         }
 
 

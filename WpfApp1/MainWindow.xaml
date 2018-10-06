@@ -23,7 +23,8 @@
         <Button x:Name="Button3" Content="Check HH" HorizontalAlignment="Left" Margin="846,13,0,0" VerticalAlignment="Top" Width="93" Click="Button3_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
         <Button x:Name="Button5" Content="LoadFromXLS"  HorizontalAlignment="Left" Margin="846,45,0,0" VerticalAlignment="Top" Width="93" Click="Button5_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
         <Button x:Name="Button1" Content="Analize"  HorizontalAlignment="Left" Margin="846,78,0,0" VerticalAlignment="Top" Width="93" Click="Button1_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
-        <Button x:Name="Button4" Content="Analize"  HorizontalAlignment="Left" Margin="846,149,0,0" VerticalAlignment="Top" Width="93" Click="Button4_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
+        <!--<Button x:Name="Button4" Content="Analize"  HorizontalAlignment="Left" Margin="846,149,0,0" VerticalAlignment="Top" Width="93" Click="Button4_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>-->
+        <Button x:Name="Button4" Content="Analize"  HorizontalAlignment="Left" Margin="846,149,0,0" VerticalAlignment="Top" Width="93" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
 
         <!--<WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,0">-->
         <ProgressBar x:Name="PB"  Height="17" Background ="White" HorizontalAlignment="Left" Margin="223,33,0,0" VerticalAlignment="Top" Width="598" BorderThickness="2"/>

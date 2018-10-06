@@ -31,25 +31,29 @@ namespace WpfApp1
 
     delegate void UpdateProgressBarDelegate(DependencyProperty dp, object value);
 
-    public class MyController : INotifyPropertyChanged
+    public interface IPresentier
     {
-        public MyController(IMyWindow form)
+        void Load(IModel m);
+        void NavigateEv(object sender, RoutedEventArgs e);
+    }
+
+    public class MyPresentier : IPresentier, INotifyPropertyChanged
+    {
+        private readonly IView View;
+        private readonly IModel Model;
+
+        string answer, webs;
+        public IList<Record> spisok = new List<Record>();
+        ObservableCollection<q> yap;
+
+
+        public MyPresentier(IView View, IModel Model)
         {
-            this.form = form;
+            this.View = View;
+            this.Model = Model;
         }
 
 
-        private readonly IMyWindow form;
-
-
-
-        string answer, webs;
-       
-
-
-        public IList<Record> spisok = new List<Record>();
-
-        ObservableCollection<q> yap;
 
 
         delegate void spfunc();
@@ -80,7 +84,7 @@ namespace WpfApp1
 
         //private ILoader loader;
 
-        public void Load(ILoader loader)
+        public void Load(IModel loader)
         {
             //loader = loader1;
             loader.Load(spisok);
