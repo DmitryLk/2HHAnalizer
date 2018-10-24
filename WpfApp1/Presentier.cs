@@ -44,7 +44,7 @@ namespace WpfApp1
 
     }
 
-    public class MyPresentier : IPresentier, INotifyPropertyChanged
+    public class MyPresentier : IPresentier
     {
         private readonly IView View;
         private readonly IModel Model;
@@ -137,32 +137,7 @@ namespace WpfApp1
            
         }
 
-        //delegate void spfunc();
-        //spfunc workerFunc;
-
-        private double pbprc;
-        public double Pbprc
-        {
-            get { return pbprc; }
-
-            set
-            {
-                pbprc = value;
-                OnPropertyChanged("Pbprc");
-            }
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-
-        
+           
         //private ILoader loader;
 
      

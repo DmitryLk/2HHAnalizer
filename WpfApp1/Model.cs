@@ -26,41 +26,21 @@ namespace WpfApp1
         ObservableCollection<q> AnalizeAsync();
         event EventHandler<MyEventArgs> Changed;
         ObservableCollection<Record> GetData();
-        void OnPropertyChanged(string propName);
+       
     }
 
 
-    public class MyModel : IModel, INotifyPropertyChanged
+    public class MyModel : IModel
     {
         private ObservableCollection<Record> Spisok { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
-        public void OnPropertyChanged(string propName)
-        {
-            PropertyChanged(this, new PropertyChangedEventArgs(propName));
-        }
-
-
-
-
 
         ObservableCollection<q> yap;
 
         public event EventHandler<MyEventArgs> Changed = delegate { };
 
-        //private readonly IView View;
+       
 
-        private double pbprc;
-        public double Pbprc
-        {
-            get { return pbprc; }
-
-            set
-            {
-                pbprc = value;
-                OnPropertyChanged("Pbprc");
-            }
-        }
+      
        
 
         public MyModel()
@@ -131,4 +111,25 @@ namespace WpfApp1
 }
 
 
+/*
+ *       public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public void OnPropertyChanged(string propName)
+        {
+            PropertyChanged(this, new PropertyChangedEventArgs(propName));
+        }
+ * 
+ *   private double pbprc;
+        public double Pbprc
+        {
+            get { return pbprc; }
 
+            set
+            {
+                pbprc = value;
+                OnPropertyChanged("Pbprc");
+            }
+        }
+ * 
+ * 
+ * 
+ */

@@ -122,7 +122,7 @@ namespace WpfApp1
                 rec.LastCheckDate = tmpdate.AddDays(Convert.ToDouble(tmp[i, 17]) - 2);
 
                 SC.Post(new SendOrPostCallback(o => { Spisok.Add(rec); }),1);
-                m.OnPropertyChanged("Spisok");
+              
 
 
 

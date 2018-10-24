@@ -46,7 +46,7 @@ namespace WpfApp1
         
     }
 
-    public partial class MainWindow : Window, IView, INotifyPropertyChanged
+    public partial class MainWindow : Window, IView
     {
 
 
@@ -59,16 +59,8 @@ namespace WpfApp1
         public ObservableCollection<Record> Spisok
         {
             get { return _spisok; }
-            set { _spisok = value; RaisePropertyChanged("Spisok"); }
+            set { _spisok = value; }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
-
-        private void RaisePropertyChanged(string propName)
-        {
-            PropertyChanged(this, new PropertyChangedEventArgs(propName));
-        }
-
 
         public string WebString
         {
@@ -94,10 +86,20 @@ namespace WpfApp1
 
             //Spisok = Model.GetData();
             //Binding binding = new Binding();
+            //binding.Source = Spisok;
             //MyGrid.SetBinding(DataGrid.ItemsSourceProperty, binding);
+
+
+
+            //MyGrid.ItemsSource = Spisok;
             //MyGrid.DataContext = Spisok;
 
+            //MyGrid.RowStyle.Triggers
+
             //this.DataContext = this;
+
+
+
 
 
         }
@@ -161,7 +163,7 @@ namespace WpfApp1
             SC.Post(new SendOrPostCallback(o => { PBtext.Text = ""; }), e);
             SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), e);
 
-            MyGrid.ItemsSource = null;
+            //MyGrid.ItemsSource = null;
             MyGrid.ItemsSource = Spisok;
             MyGrid.RowHeight = 20;
             MyGrid.Refresh();

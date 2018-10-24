@@ -18,4 +18,3 @@ C:\Users\Галина\source\repos\WpfApp1\WpfApp1\bin\Debug\HtmlAgilityPack.xml
 C:\Users\Галина\source\repos\WpfApp1\WpfApp1\obj\Debug\WpfApp1.csproj.CopyComplete
 C:\Users\Галина\source\repos\WpfApp1\WpfApp1\obj\Debug\App.baml
 C:\Users\Галина\source\repos\WpfApp1\WpfApp1\obj\Debug\Dictionary1.baml
-C:\Users\Галина\source\repos\WpfApp1\WpfApp1\obj\Debug\WpfApp1.csprojAssemblyReference.cache

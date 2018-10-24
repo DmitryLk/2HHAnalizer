@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="511.796" Width="968.079" DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    
+        Title="MainWindow" Height="511.796" Width="968.079">
+        <!--Title="MainWindow" Height="511.796" Width="968.079" DataContext="{Binding RelativeSource={RelativeSource Self}}">-->
+
     <Window.Resources>
 
         <!--<local:MainWindow x:Key="myDataSource" x:Name="PBprc"/>-->
@@ -43,18 +44,21 @@
             <TabItem x:Name="Grid" Header="Grid">
                 <Grid Background="#FFE5E5E5">
                     <!--<DataGrid x:Name="MyGrid" ItemsSource="{Binding Spisok}" datacontext="{Binding mode= hold}" RowHeight = "20" AutoGenerateColumns="True" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadingRow="MyGrid_LoadingRow">-->
-                    <DataGrid x:Name="MyGrid" ItemsSource="{Binding Spisok}" RowHeight = "20" AutoGenerateColumns="True" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadingRow="MyGrid_LoadingRow">
-                            <!--<DataGrid.BindingGroup>
+                    <DataGrid x:Name="MyGrid" ItemsSource="{Binding Spisok}" RowHeight = "20" CanUserSortColumns="true" AutoGenerateColumns="True" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadingRow="MyGrid_LoadingRow">
+                        <!--<DataGrid.BindingGroup>
                             <BindingGroup/>
                         </DataGrid.BindingGroup>-->
-                        <!--<DataGrid.Columns>
-                            <DataGridTextColumn Header="Еда" Binding="{Binding Name}" Width="120"/>
-                        </DataGrid.Columns>-->
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="120"/>
+                        </DataGrid.Columns>
                         <DataGrid.RowStyle>
                             <Style TargetType="DataGridRow">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding C#}" Value="false">
+                                    <DataTrigger Binding="{Binding Closed}" Value="true">
                                         <Setter Property="Background" Value="Red"></Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Sharp}" Value="true">
+                                        <Setter Property="Background" Value="Green"></Setter>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
