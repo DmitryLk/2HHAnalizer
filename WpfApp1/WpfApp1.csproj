@@ -80,6 +80,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Awaiter.cs" />
+    <Compile Include="WebLoader.cs" />
+    <Compile Include="XLSLoader.cs" />
+    <Compile Include="XLSSaver.cs" />
     <Page Include="Dictionary1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

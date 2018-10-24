@@ -9,7 +9,11 @@ using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Reflection;
 using Microsoft.Win32;
-
+using System.Collections.ObjectModel;
+using HtmlAgilityPack;
+using System.Text.RegularExpressions;
+using System.ComponentModel;
+using System.Threading;
 
 
 
@@ -17,175 +21,113 @@ namespace WpfApp1
 {
     public interface IModel
     {
-        void Load(IList<Record> r);
+        Task<ObservableCollection<Record>> LoadAsync(ILoader t, CancellationToken cancellationToken);
+        Task SaveAsync(ISaver t, CancellationToken cancellationToken);
+        ObservableCollection<q> AnalizeAsync();
+        event EventHandler<MyEventArgs> Changed;
+        ObservableCollection<Record> GetData();
+        void OnPropertyChanged(string propName);
     }
 
 
-    class MyModel : IModel
+    public class MyModel : IModel, INotifyPropertyChanged
     {
-        Excel.Application excelApp;
-        Excel.Workbook workBook;
-        Excel.Worksheet workSheet;
-        Excel.Range range;
-        Process[] excelProcsOld;
+        private ObservableCollection<Record> Spisok { get; set; }
 
-
-        private readonly IView View;
-        public MyModel(IView View)
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public void OnPropertyChanged(string propName)
         {
-            this.View = View;
+            PropertyChanged(this, new PropertyChangedEventArgs(propName));
         }
 
 
-        List<Record> spisok;
 
-        public void Load(IList<Record> spisok)
+
+
+        ObservableCollection<q> yap;
+
+        public event EventHandler<MyEventArgs> Changed = delegate { };
+
+        //private readonly IView View;
+
+        private double pbprc;
+        public double Pbprc
         {
-            this.spisok = (List<Record>)spisok;
+            get { return pbprc; }
 
+            set
+            {
+                pbprc = value;
+                OnPropertyChanged("Pbprc");
+            }
+        }
+       
+
+        public MyModel()
+        {
+            //this.View = View;
+            Spisok = new ObservableCollection<Record>();
+            yap = new ObservableCollection<q>();
+            Array.ForEach(new string[] { "1C", ".NET", "ADO.NET", "ajax", "Angular", "AngularJS", "aop", "ASP.NET", "bash", "C#", "C++", "CD", "CI", "Confluence", "CSS", "D3.js", "delphi", "design patterns", "Entity Framework", "ExtJS", "firebird", "git", "gitlab", "HTML", "html5", "Java ", "JavaScript", "jira", "jQuery", "jquery", "js", "kanban", "kiss", "Knockout", "Linq", "MongoDB", "mssql", "mvc", "mvi", "mvp", "mvvm", "mysql", "Node.js", "oracle", "orm", "Perl", "PHP", "PL/SQL", "PostgreSQL", "powershell", "Python", "React", "rest", "rubocop", "Ruby", "scrum", "slack", "soap", "solid", "Swift", "tdd", "tfs", "T-SQL", "TypeScript", "vcs", "Vue.js", "wcf", "webapi", "WebGL", "winforms", "xml", "xpath", "xquery", "xsd", "xsl", "zendesk" }, s => yap.Add(new q(s)));
+            //Array.ForEach(new string[] { "Java ", "JavaScript", "C#", "C++", "Ruby", "1C", "PHP ", "ASP.NET", "PostgeSQL", "Python" }, s => yap.Add(new q(s)));
+
+            
+        }
+
+        public async Task SaveAsync(ISaver Saver, CancellationToken token)
+        {
+            Saver.Changed += ChangeState;
+            await Saver.Save(Spisok, token);
+        }
+
+        public async Task<ObservableCollection<Record>> LoadAsync(ILoader Loader, CancellationToken token)
+        {
+            Loader.Changed += ChangeState;
+            await Loader.Load(Spisok, token, this);
+            return Spisok;
+
+            //var ti = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            //this.spisok = (ObservableCollection<Record>)spisok;
             //PB.Maximum = 345;// ReadHHCountVac();
             //PB.Value = 0;
-            workerFunc = LoadFromXLS;
-            worker.RunWorkerAsync();
+            //workerFunc = LoadFromXLS;
+            //worker.RunWorkerAsync();
         }
 
-        private void LoadFromXLS()
+        public ObservableCollection<Record> GetData()
+        {
+            return Spisok;
+        }
+
+        public ObservableCollection<q> AnalizeAsync()
+        {
+            MyEventArgs args = new MyEventArgs();
+            args.MaxValue = yap.Count;
+            args.Value = 0;
+            foreach (q p in yap)
+            {
+                p.count = Spisok.Count(t => t.AllInfo().ContainsCI(p.Name) || t.AllInfo().ContainsCI(p.NameRus()));
+
+                ++args.Value;
+                if (Changed != null) Changed(this, args);
+
+            }
+            return yap;
+
+            //UpdateProgressBarDelegate updProgress = new UpdateProgressBarDelegate(PB.SetValue);
+            //yap.ForEach<q>(p => p.count = spisok.Count(t => t.AllInfo().ContainsCI(p.Name) || t.AllInfo().ContainsCI(p.NameRus())));
+            //Dispatcher.Invoke(updProgress, new object[] { ProgressBar.ValueProperty, ++value });
+            //Pbprc = value / yap.Count() * 100;
+        }
+
+
+        public void ChangeState(object sender, MyEventArgs e)
         {
 
-
-
-            int i, j, k;
-            excelProcsOld = Process.GetProcessesByName("EXCEL");
-            excelApp = new Excel.Application();
-            object[,] tmp;
-            Record rec;
-            double value = 0;
-
-
-            UpdateProgressBarDelegate updProgress = new UpdateProgressBarDelegate(PB.SetValue);
-
-            range = null;
-            string path = Directory.GetCurrentDirectory() + "\\Spisok.xlsx";
-            OpenFileDialog theDialog = new OpenFileDialog();
-            theDialog.Title = "Open XLS File";
-            theDialog.Filter = "XLS files|*.xlsx";
-            theDialog.InitialDirectory = Directory.GetCurrentDirectory();
-
-            if (theDialog.ShowDialog() == true) path = theDialog.FileName;
-
-
-
-            workBook = excelApp.Workbooks.Open(path, 0, true, 5, "", "", false, Excel.XlPlatform.xlWindows, "", true, false, 0, true, false, false);
-            workSheet = (Excel.Worksheet)workBook.Worksheets.get_Item(1);
-
-            range = workSheet.get_Range("A1", Missing.Value);
-            range = range.get_End(Excel.XlDirection.xlDown);
-            j = range.Row - 1;
-            range = workSheet.get_Range("A1", Missing.Value);
-            range = range.get_End(Excel.XlDirection.xlToRight);
-            k = range.Column;
-
-            range = workSheet.get_Range((Excel.Range)workSheet.Cells[2, 1], (Excel.Range)workSheet.Cells[j + 1, k]);
-            tmp = range.Value2;
-            spisok.Clear();
-
-            //rec.Clear();
-            //public IList<Record> spisok = new List<Record>();
-
-
-            for (i = 1; i <= j; i++)
-            {
-                rec = new Record();
-                rec.Name = tmp[i, 1]?.ToString();
-                rec.Zp = tmp[i, 2]?.ToString();
-                rec.Comp = tmp[i, 3]?.ToString();
-                rec.Town = tmp[i, 4]?.ToString();
-                rec.Resp1 = tmp[i, 5]?.ToString();
-                rec.Req1 = tmp[i, 6]?.ToString();
-                rec.Dat = tmp[i, 7]?.ToString();
-                rec.Opt = tmp[i, 8]?.ToString();
-                rec.Desc.Append(tmp[i, 9]?.ToString());
-                rec.Id = tmp[i, 10].ToString();
-                rec.Sharp = Convert.ToBoolean(tmp[i, 11]);
-                rec.JavaScript = Convert.ToBoolean(tmp[i, 12]);
-                rec.Distant = Convert.ToBoolean(tmp[i, 13]);
-
-                spisok.Add(rec);
-                Dispatcher.Invoke(updProgress, new object[] { ProgressBar.ValueProperty, ++value });
-                Pbprc = value / 350 * 100;
-            }
-
-
-
-            QuitExcel();
+            if (Changed != null) Changed(sender, e);
         }
-
-
-
-        public void QuitExcel()
-        {
-            object misValue = System.Reflection.Missing.Value;
-            IntPtr xAsIntPtr = new IntPtr(excelApp.Hwnd);
-            if (excelApp != null)
-            {
-
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(range);
-
-
-                foreach (Microsoft.Office.Interop.Excel.Worksheet sheet in workBook.Worksheets)
-                {
-                    System.Runtime.InteropServices.Marshal.ReleaseComObject(sheet);
-                }
-
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(workBook.Worksheets);
-                excelApp.DisplayAlerts = false;
-
-                workBook.Close(false, misValue, misValue);
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(workBook);
-
-
-                excelApp.Application.Quit();
-                excelApp.Quit();
-                excelApp.DisplayAlerts = true;
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
-
-                excelApp = null;
-                workBook = null;
-                workSheet = null;
-                range = null;
-
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-            }
-
-
-            Process[] excelProcsNew = Process.GetProcessesByName("EXCEL");
-            foreach (Process procNew in excelProcsNew)
-            {
-                int exist = 0;
-                foreach (Process procOld in excelProcsOld)
-                {
-                    if (procNew.Id == procOld.Id)
-                    {
-                        exist++;
-                    }
-                }
-                if (exist == 0)
-                {
-                    procNew.Kill();
-                }
-            }
-        }
-
-
-
 
     }
-
-
 }
 
 

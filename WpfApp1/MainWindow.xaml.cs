@@ -24,6 +24,8 @@ using System.Text.RegularExpressions;
 using System.IO.Compression;
 using System.Reflection;
 using Microsoft.Win32;
+using System.Threading;
+using System.Windows.Controls.Primitives;
 
 
 
@@ -32,38 +34,40 @@ namespace WpfApp1
 {
 
 
-    public static class ExtensionsIEnumerable
-    {
-        public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
-        {
-            foreach (var item in enumerable)
-            {
-                action(item);
-            }
-        }
-    }
-
-    public static class ExtensionsString
-    {
-        public static bool ContainsCI(this string text, string value, StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
-        {
-            return text.IndexOf(value, stringComparison) >= 0;
-        }
-    }
-
+    
     public interface IView
     {
         string WebString { get; set; }
         double PBmax { get;  set; }
-        WebBrowser wb { get; }
+        void SpisokView(ObservableCollection<Record> Spisok);
+        void YapView(ObservableCollection<q> qs);
+        void PB_Update(MyEventArgs e);
+      
+        
     }
 
-    public partial class MainWindow : Window, IView
+    public partial class MainWindow : Window, IView, INotifyPropertyChanged
     {
 
 
         private IPresentier Presentier;
         private IModel Model;
+        private readonly SynchronizationContext SC;
+
+        public ObservableCollection<Record> _spisok;
+
+        public ObservableCollection<Record> Spisok
+        {
+            get { return _spisok; }
+            set { _spisok = value; RaisePropertyChanged("Spisok"); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+
+        private void RaisePropertyChanged(string propName)
+        {
+            PropertyChanged(this, new PropertyChangedEventArgs(propName));
+        }
 
 
         public string WebString
@@ -78,90 +82,133 @@ namespace WpfApp1
             set { PB.Maximum = value; PB.Value = 0; }
         }
 
-        public WebBrowser wb
-        {
-            get { return WebBrowser1; }
-            //set { TextBox1.Text = value; }
-        }
 
         //====================================================
         public MainWindow() 
         {
             InitializeComponent();
-
-            Model = new MyModel(this);
+            Model = new MyModel();
             Presentier = new MyPresentier(this, Model);
- 
-            Button4.Click += Presentier.NavigateEv;
-            Button4.Click += new RoutedEventHandler(Button4_Click);
-            Button4.AddHandler(Button.ClickEvent, new RoutedEventHandler(Button4_Click));
+            SC = SynchronizationContext.Current;
+
+
+            //Spisok = Model.GetData();
+            //Binding binding = new Binding();
+            //MyGrid.SetBinding(DataGrid.ItemsSourceProperty, binding);
+            //MyGrid.DataContext = Spisok;
+
+            //this.DataContext = this;
 
 
         }
 
-        BackgroundWorker worker;
         public void Main()
         {
-            worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-
-            //WebBrowser.LoadCompleted += WebBrowser_LoadCompleted;
-
-            PBtext.DataContext = this;
-
-            yap = new ObservableCollection<q>();
-
-            Array.ForEach(new string[] { "1C", ".NET", "ADO.NET", "ajax", "Angular", "AngularJS", "aop", "ASP.NET", "bash", "C#", "C++", "CD", "CI", "Confluence", "CSS", "D3.js", "delphi", "design patterns", "Entity Framework", "ExtJS", "firebird", "git", "gitlab", "HTML", "html5", "Java ", "JavaScript", "jira", "jQuery", "jquery", "js", "kanban", "kiss", "Knockout", "Linq", "MongoDB", "mssql", "mvc", "mvi", "mvp", "mvvm", "mysql", "Node.js", "oracle", "orm", "Perl", "PHP", "PL/SQL", "PostgreSQL", "powershell", "Python", "React", "rest", "rubocop", "Ruby", "scrum", "slack", "soap", "solid", "Swift", "tdd", "tfs", "T-SQL", "TypeScript", "vcs", "Vue.js", "wcf", "webapi", "WebGL", "winforms", "xml", "xpath", "xquery", "xsd", "xsl", "zendesk" }, s => yap.Add(new q(s)));
-            //Array.ForEach(new string[] { "Java ", "JavaScript", "C#", "C++", "Ruby", "1C", "PHP ", "ASP.NET", "PostgeSQL", "Python" }, s => yap.Add(new q(s)));
-
-
-            Binding binding = new Binding();
-            listbox1.SetBinding(ListBox.ItemsSourceProperty, binding);
-            listbox1.DataContext = yap;
-
-        }
-
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            TextBox2.Text = answer;
-            MyGrid.ItemsSource = spisok;
-        }
-
-
-        void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            workerFunc();
-            //ReadHH();
-            //SaveToXLS();
-        }
-
-
-        private void Button3_Click(object sender, RoutedEventArgs e)  //CheckHH
-        {
-            Ctrl.Navigate();
-        }
-
-        private void Button5_Click(object sender, RoutedEventArgs e)  //LoadFromXLS
-        {
-            Ctrl.Load(xlsloader);
         }
 
         private void Button1_Click(object sender, RoutedEventArgs e)  // Analize
         {
-            PB.Maximum = yap.Count();
-            PB.Value = 0;
-            workerFunc = Analize;
-            worker.RunWorkerAsync();
+            Button1.IsEnabled = false;
+            Presentier.AnalizeAsync();
         }
 
-        private void Button4_Click(object sender, RoutedEventArgs e)
+        private async void Button3_Click(object sender, RoutedEventArgs e)  //LoadFromWeb
         {
+            Button3.IsEnabled = false;
+            Button6.IsEnabled = true;
+            TabControl1.SelectedIndex = 2;
+
+            await Presentier.LoadFromWeb(TextBox1.Text, WebBrowser1, SC);
+            //WebBrowser1.Navigate(TextBox1.Text);
+            //await Application.Current.Dispatcher.BeginInvoke(new Action(() => { WebBrowser1.Navigate(TextBox1.Text); }));
         }
+
+        private async void Button4_Click(object sender, RoutedEventArgs e)  //SaveToXLS
+        {
+            Button4.IsEnabled = false;
+            await Presentier.SaveToXLS();
+            Button4.IsEnabled = true;
+        }
+
+        private void Button5_Click(object sender, RoutedEventArgs e)  //LoadFromXLS
+        {
+            Button5.IsEnabled = false;
+            Spisok = null;
+            Presentier.LoadFromXLS(SC);
+        }
+
+        private void Button6_Click(object sender, RoutedEventArgs e)  //Cancel
+        {
+            Button6.IsEnabled = false;
+
+            //SC.Post(new SendOrPostCallback(o => { PB.Value = 0; PB.Maximum = 1  ; }), e);
+            //SC.Post(new SendOrPostCallback(o => { PBtext.Text = ""; }), e);
+            //SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), e);
+
+
+
+            Presentier.Cancel();
+        }
+
+
         //====================================================
 
+        public void SpisokView(ObservableCollection<Record> Spisok)
+        {
+            //MyGrid.row.HeaderCell.Value = String.Format("{0}", row.Index + 1);
+            int e = 2;
+            SC.Post(new SendOrPostCallback(o => { PB.Value = 0; PB.Maximum = 100; }), e);
+            SC.Post(new SendOrPostCallback(o => { PBtext.Text = ""; }), e);
+            SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), e);
+
+            MyGrid.ItemsSource = null;
+            MyGrid.ItemsSource = Spisok;
+            MyGrid.RowHeight = 20;
+            MyGrid.Refresh();
+
+            //this.DataContext = Spisok;
 
 
+
+            //if (MyGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            //{
+            //    var row = (DataGridRow)MyGrid.ItemContainerGenerator.ContainerFromIndex(1);
+            //    row.Background = Brushes.Red;
+            //    //foreach (var dataItem in DisplayDataGrid.ItemsSource)
+            //    //{
+            //    //    var gridRow = DisplayDataGrid.ItemContainerGenerator.ContainerFromItem(dataItem) as DataGridRow;
+            //    //}
+            //    //DataGridRow rowColor = (DataGridRow)dataGridViewMyGroups.ItemContainerGenerator.ContainerFromIndex(number);
+            //    //row.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(223, 227, 238));
+            //}
+
+
+            Button1.IsEnabled = true;
+            Button4.IsEnabled = true;
+            Button5.IsEnabled = true;
+            Button3.IsEnabled = true;
+            Button6.IsEnabled = false;
+        }
+
+        public void YapView(ObservableCollection<q> yap)
+        {
+            listbox1.ItemsSource = yap;
+            Button1.IsEnabled = true;
+        }
+
+        public void PB_Update(MyEventArgs e)
+        {
+            //Application.Current.Dispatcher.BeginInvoke(new Action(() => { PB.Value = e.Value; PB.Maximum = e.MaxValue; }));
+            SC.Post(new SendOrPostCallback(o => { PB.Value = e.Value; PB.Maximum = e.MaxValue; }), e);
+            SC.Post(new SendOrPostCallback(o => { PBtext.Text = e.Value + " (" + e.Value2 + ") / " + e.MaxValue; }), e);
+            SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), e);
+            
+            //synchronizationContext.Post(new SendOrPostCallback(o => {MyGrid.ItemsSource = Spisok;}),Spisok);
+        }
+
+        //====================================================
+
+      
 
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
@@ -194,6 +241,10 @@ namespace WpfApp1
 
         }
 
+        private void MyGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            e.Row.Header = (e.Row.GetIndex()+1).ToString();
+        }
     }
 
     public class SortAdorner : Adorner
@@ -232,10 +283,6 @@ namespace WpfApp1
             drawingContext.Pop();
         }
     }
-
-
-
-
 }
 
 
@@ -250,37 +297,6 @@ namespace WpfApp1
     //        return request;
     //    }
     //}
-            //web = new HtmlWeb();
-            //document = web.Load(webs);
-            //text = document.SelectSingleNode("//div[@data-qa='vacancies-total-found']")?.InnerText ?? "";
-            //    HtmlAgilityPack.HtmlDocument hDocument = new HtmlAgilityPack.HtmlDocument();
-            //    hDocument.LoadHtml(WebBrowser.Document.GetElementsByTagName("HTML")[0].OuterHtml);
-            ////    //this.Price = Convert.ToDouble(hDocument.DocumentNode.SelectNodes("//td[@class='ask']").FirstOrDefault().InnerText.Trim());
-            //    //_WebBrowser.FindForm().Close();
-            //    //_lock.Set();
-            //string HTML2 = WebBrowser.InvokeScript(@"document.getElementsByTagName ('html')[0].innerHTML").ToString();
-            //mshtml.IHTMLDocument2 doc = (mshtml.IHTMLDocument2)WebBrowser.Document.DomDocument;
-            //    foreach (IHTMLElement element in doc.all)
-            //    {
-            //        System.Diagnostics.Debug.WriteLine(element.outerHTML);
-            //    }
-            //        Dim eCollections As HtmlElementCollection
-            //Dim strDoc As String
-            //eCollections = WB.Document.GetElementsByTagName("HTML")
-            //strDoc = eCollections(0).OuterHtml
-            //        docHtml = browser.DocumentText;
-            //        var doc = ((Form1)Application.OpenForms[0]).webBrowser1.Document;
-            //        doc.GetElementById("myDataTable");
-            //        var renderedHtml = doc.GetElementsByTagName("HTML")[0].OuterHtml;
-            //        webBrowser1.Document.GetElementsByTagName("HTML")[0].OuterHtml;
-            //wb.DocumentCompleted += delegate (object sender, WebBrowserDocumentCompletedEventArgs e)
-            //{
-            //    mshtml.IHTMLDocument2 doc = (mshtml.IHTMLDocument2)wb.Document.DomDocument;
-            //    foreach (IHTMLElement element in doc.all)
-            //    {
-            //        System.Diagnostics.Debug.WriteLine(element.outerHTML);
-            //    }
-            //};
 
 
 
@@ -382,5 +398,61 @@ namespace WpfApp1
 
                 //WebBrowser.LoadCompleted += WebBrowser_LoadCompleted;
 
+
  * 
+ *             //Spisok = await Task.Run( () => Model.LoadAsync(xlsloader));
+            //Task<ObservableCollection<Record>> task;
+            //task = Task<ObservableCollection<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader), TaskCreationOptions.LongRunning);
+            //Spisok = await task;
+            //ObservableCollection<q> yap;
+            //yap = await Task.Run(() => Model.AnalizeAsync());
+            //View.YapView(yap);
+            //Task<ObservableCollection<Record>> task = new Task<ObservableCollection<Record>>(() => Model.LoadAsync(xlsloader));
+            //Spisok = await task;
+            //task =  Task.Factory.StartNew(() => Model.LoadAsync(xlsloader));
+            //task = Task<ObservableCollection<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader));
+            //MyEventArgs args = new MyEventArgs();
+            //Spisok = Model.Load(xlsloader);
+            //Spisok = await Task.Run( () => Model.LoadAsync(xlsloader));
+            //xlsloader.Changed += new EventHandler(PB_Change);
+            //args.Spisok = Model.LoadAsync(xlsloader, PB);
+            //if (SpisokReady != null) SpisokReady(this, args);
+
+            //Presentier.SpisokReady += SpisokView;
+        //Button4.Click += Presentier.NavigateEv;
+        //Button4.Click += new RoutedEventHandler(Button4_Click);
+        //Button4.AddHandler(Button.ClickEvent, new RoutedEventHandler(Button4_Click));
+        //worker = new BackgroundWorker();
+        //worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+        //worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+        //WebBrowser.LoadCompleted += WebBrowser_LoadCompleted;
+        //private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        //{
+        //    TextBox2.Text = answer;
+        //    MyGrid.ItemsSource = spisok;
+        //}
+        //void worker_DoWork(object sender, DoWorkEventArgs e)
+        //{
+        //    workerFunc();
+        //    //ReadHH();
+        //    //SaveToXLS();
+        //}
+
+                //Application.Current.Dispatcher.BeginInvoke(new Action(() => { MyGrid.ItemsSource = Spisok; }));
+            //MyGrid.ItemsSource = e.Spisok;
+            //synchronizationContext.Post(new SendOrPostCallback(o => {MyGrid.ItemsSource = Spisok;}),Spisok);
+            //MyGrid.ItemsSource = Spisok;
+            //PB.Maximum = yap.Count();
+            //PB.Value = 0;
+            //workerFunc = Analize;
+            //worker.RunWorkerAsync();
+            //PBtext.DataContext = this;
+            //Binding binding = new Binding();
+            //listbox1.SetBinding(ListBox.ItemsSourceProperty, binding);
+            //listbox1.DataContext = yap;
+
+
+                //MyGrid.ItemsSource = Spisok;
+
+ * * 
  */
