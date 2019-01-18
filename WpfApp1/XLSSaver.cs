@@ -35,7 +35,7 @@ namespace WpfApp1
 {
     public interface ISaver
     {
-        Task Save(ObservableCollection<Record> spisok, CancellationToken token);
+        Task Save(IList<Record> spisok, CancellationToken token);
         event EventHandler<MyEventArgs> Changed;
     }
 
@@ -46,7 +46,7 @@ namespace WpfApp1
 
 
 
-        public async Task Save(ObservableCollection<Record> Spisok, CancellationToken token)
+        public async Task Save(IList<Record> Spisok, CancellationToken token)
         {
             int i;
             string path, text;
@@ -60,11 +60,21 @@ namespace WpfApp1
             excelApp = new Excel.Application();
 
 
-            var data = new object[Spisok.Count+1, 18];
+            var data = new object[Spisok.Count+1, 21];
             
 
 
             path = Directory.GetCurrentDirectory() + "\\Spisok.xlsx";
+
+            OpenFileDialog theDialog = new OpenFileDialog();
+            theDialog.Title = "Open XLS File";
+            theDialog.Filter = "XLS files|*.xlsx";
+            theDialog.InitialDirectory = Directory.GetCurrentDirectory();
+
+            if (theDialog.ShowDialog() == true) path = theDialog.FileName;
+
+
+
             if (System.IO.File.Exists(path))
             {
                 workBook = excelApp.Workbooks.Open(path, 0, false, 5, "", "", false, Excel.XlPlatform.xlWindows, "", true, false, 0, true, false, false);
@@ -95,8 +105,14 @@ namespace WpfApp1
             }
 
 
-            range1 = (Excel.Range)workSheet.Cells[1, 16];
-            range2 = (Excel.Range)workSheet.Cells[Spisok.Count + 1, 17];
+            range1 = (Excel.Range)workSheet.Cells[1, 7];
+            range2 = (Excel.Range)workSheet.Cells[Spisok.Count + 1, 7];
+            range = workSheet.Range[range1, range2];
+            range.NumberFormat = "DD/MM/YYYY";
+
+
+            range1 = (Excel.Range)workSheet.Cells[1, 18];
+            range2 = (Excel.Range)workSheet.Cells[Spisok.Count + 1, 19];
             range = workSheet.Range[range1, range2];
             range.NumberFormat = "DD/MM/YYYY";
 
@@ -114,11 +130,16 @@ namespace WpfApp1
             data[0, 10] = "link";
             data[0, 11] = "C#";
             data[0, 12] = "JavaScript";
-            data[0, 13] = "удаленно";
-            data[0, 14] = "Closed";
-            data[0, 15] = "BeginigDate";
-            data[0, 16] = "LastCheckDate";
-            data[0, 17] = "Период";
+            data[0, 13] = "SQL";
+            data[0, 14] = "1C";
+            data[0, 15] = "удаленно";
+            data[0, 16] = "Closed";
+            data[0, 17] = "BeginigDate";
+            data[0, 18] = "LastCheckDate";
+            data[0, 19] = "Период";
+            data[0, 19] = "Период";
+            data[0, 20] = "Интерес";
+
 
 
             args.MaxValue = Spisok.Count;
@@ -135,16 +156,24 @@ namespace WpfApp1
                 data[i, 5] = rec.Req1;
                 data[i, 6] = rec.Dat;
                 data[i, 7] = rec.Opt;
-                data[i, 8] = rec.Desc.ToString();
+                data[i, 8] = rec.Desc;
                 data[i, 9] = rec.Id;
                 data[i, 10] = rec.link;
                 data[i, 11] = rec.Sharp;
                 data[i, 12] = rec.JavaScript;
-                data[i, 13] = rec.Distant;
-                data[i, 14] = rec.Closed;
-                data[i, 15] = rec.BeginingDate;
-                data[i, 16] = rec.LastCheckDate;
-                data[i, 17] = (rec.LastCheckDate - rec.BeginingDate).TotalDays;
+                data[i, 13] = rec.SQL;
+                data[i, 14] = rec._1C;
+                data[i, 15] = rec.Distant;
+                data[i, 16] = rec.Closed;
+                data[i, 17] = rec.BeginingDate;
+                data[i, 18] = rec.LastCheckDate;
+                data[i, 19] = (rec.LastCheckDate - rec.BeginingDate).TotalDays;
+
+                if (rec.BeginingDate < rec.Dat) data[i, 19] = (rec.LastCheckDate - rec.BeginingDate).TotalDays; else data[i, 19] = (rec.LastCheckDate - rec.Dat).TotalDays;
+
+                data[i, 20] = rec.Interes;
+
+
                 //workSheet.Rows[i].RowHeight = 15;
                 await Task.Delay(1);
                 args.Value = i;
@@ -157,7 +186,7 @@ namespace WpfApp1
 
 
             range1 = (Excel.Range)workSheet.Cells[1, 1];
-            range2 = (Excel.Range)workSheet.Cells[Spisok.Count + 1, 18];
+            range2 = (Excel.Range)workSheet.Cells[Spisok.Count + 1, 21];
             range = workSheet.Range[range1, range2];
 
             range.Value2 = data;

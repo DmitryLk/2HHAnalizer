@@ -26,7 +26,8 @@ using System.Reflection;
 using Microsoft.Win32;
 using System.Threading;
 using System.Windows.Controls.Primitives;
-
+using System.Data;
+using System.Windows.Markup;
 
 
 
@@ -34,16 +35,20 @@ namespace WpfApp1
 {
 
 
-    
+
     public interface IView
     {
         string WebString { get; set; }
-        double PBmax { get;  set; }
-        void SpisokView(ObservableCollection<Record> Spisok);
+        string AlertString { get; set; }
+        string AnyTextString { get; set; }
+        double PBmax { get; set; }
+        void SpisokView(ICollectionView SpisokFiltered);
         void YapView(ObservableCollection<q> qs);
         void PB_Update(MyEventArgs e);
-      
-        
+
+        event EventHandler<MyEventArgs> AutoClick;
+
+
     }
 
     public partial class MainWindow : Window, IView
@@ -53,20 +58,38 @@ namespace WpfApp1
         private IPresentier Presentier;
         private IModel Model;
         private readonly SynchronizationContext SC;
+        public event EventHandler<MyEventArgs> AutoClick = delegate { };
 
-        public ObservableCollection<Record> _spisok;
 
-        public ObservableCollection<Record> Spisok
-        {
-            get { return _spisok; }
-            set { _spisok = value; }
-        }
+
 
         public string WebString
         {
             get { return TextBox1.Text; }
             set { TextBox1.Text = value; }
         }
+
+        public string AnyTextString
+        {
+            get
+            {
+                string result = null; 
+                SC.Send(new SendOrPostCallback(o =>  {result = AnyTextText.Text; }), null);
+                return result;
+                //return AnyTextText.Text;
+            }
+            set { AnyTextText.Text = value; }
+        }
+
+        public string AlertString
+        {
+            get { return Alert.Content.ToString(); }
+            set
+            {
+                SC.Post(new SendOrPostCallback(o => { Alert.Content = value; }), 2);
+            }
+        }
+
 
         public double PBmax
         {
@@ -76,12 +99,16 @@ namespace WpfApp1
 
 
         //====================================================
-        public MainWindow() 
+        public MainWindow()
         {
             InitializeComponent();
             Model = new MyModel();
             Presentier = new MyPresentier(this, Model);
             SC = SynchronizationContext.Current;
+
+
+            this.DataContext = Presentier;
+
 
 
             //Spisok = Model.GetData();
@@ -96,7 +123,7 @@ namespace WpfApp1
 
             //MyGrid.RowStyle.Triggers
 
-            //this.DataContext = this;
+            //MyGrid.DataContext = this;
 
 
 
@@ -132,11 +159,15 @@ namespace WpfApp1
             Button4.IsEnabled = true;
         }
 
-        private void Button5_Click(object sender, RoutedEventArgs e)  //LoadFromXLS
+        private async void Button5_Click(object sender, RoutedEventArgs e)  //LoadFromXLS
         {
             Button5.IsEnabled = false;
-            Spisok = null;
-            Presentier.LoadFromXLS(SC);
+
+            MyGrid.ItemsSource = null;
+
+            await Presentier.LoadFromXLS(SC);
+            //MyGrid.ItemsSource = Spisok;
+            //MyGrid.Refresh();
         }
 
         private void Button6_Click(object sender, RoutedEventArgs e)  //Cancel
@@ -152,26 +183,218 @@ namespace WpfApp1
             Presentier.Cancel();
         }
 
+        private void Bold_Click(object sender, RoutedEventArgs e)  //Cancel
+        {
+
+            TextPointer potStart = RichTextBox1.Selection.Start;
+            TextPointer potEnd = RichTextBox1.Selection.End;
+
+            TextRange range = new TextRange(potStart, potStart.GetPositionAtOffset(1));
+            Object obj = range.GetPropertyValue(TextElement.FontWeightProperty);
+
+            if (obj != DependencyProperty.UnsetValue)
+            {
+                range = new TextRange(potStart, potEnd);
+                FontWeight fontWeight = (FontWeight)obj;
+                if (fontWeight == FontWeights.Bold) range.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+                if (fontWeight == FontWeights.Normal) range.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+                String text = XamlWriter.Save(RichTextBox1.Document);
+                ((Record)MyGrid.SelectedItem).Desc = text;
+            }
+        }
+
+        private void Color_Click(object sender, RoutedEventArgs e)  //Cancel
+        {
+
+            TextPointer potStart = RichTextBox1.Selection.Start;
+            TextPointer potEnd = RichTextBox1.Selection.End;
+
+            TextRange range = new TextRange(potStart, potStart.GetPositionAtOffset(1));
+            Object obj = range.GetPropertyValue(TextElement.ForegroundProperty);
+
+            if (obj != DependencyProperty.UnsetValue)
+            {
+                range = new TextRange(potStart, potEnd);
+
+
+                SolidColorBrush fontBrush = (SolidColorBrush)obj;
+
+
+                if (fontBrush.Color == Brushes.Black.Color)
+                    range.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);
+
+                //new SolidColorBrush(GetColorFromString(rule.FontColor, (Brush)tr.GetPropertyValue(TextElement.ForegroundProperty))));
+
+
+                if (fontBrush.Color == Brushes.Red.Color) range.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
+                String text = XamlWriter.Save(RichTextBox1.Document);
+                ((Record)MyGrid.SelectedItem).Desc = text;
+            }
+        }
+
+
+        private void Auto_Click(object sender, RoutedEventArgs e)
+        {
+            MyEventArgs args = new MyEventArgs();
+            args.flowDocument = RichTextBox1.Document;
+            args.Rec = (Record)MyGrid.SelectedItem;
+            if (AutoClick != null) AutoClick(sender, args);
+
+
+        }
+
+
+
+    
+        //if (++cnt>2)
+        //textRun = position.GetTextInRun(LogicalDirection.Forward);
+        //cnt = textRun.Length;
+        //textRun = position.GetTextInRun(LogicalDirection.Forward);
+        //while (position.GetPointerContext(LogicalDirection.Forward) != TextPointerContext.Text)
+        //    position = position.GetNextContextPosition(LogicalDirection.Forward);
+        //textRun = position.GetTextInRun(LogicalDirection.Forward);
+        //cnt = textRun.Length;
+
+        //            if (boldWords != null)
+        //            {
+        //                TextPointer position = flowDocument.ContentStart;
+        //                while (position != null)
+        //                {
+        //                    if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+        //                    {
+        //                        string textRun = position.GetTextInRun(LogicalDirection.Forward);
+
+        //                        // Find the starting index of any substring that matches "word".
+        //                        foreach (String word in boldWords)
+        //                        {
+        //                            indexInRun = textRun.IndexOf(word, StringComparison.CurrentCultureIgnoreCase);
+
+        //                            while (indexInRun != -1)
+        //                            {
+        //                                TextPointer start = position.GetPositionAtOffset(indexInRun);
+        //        TextPointer end = start.GetPositionAtOffset(word.Length);
+        //        TextRange selection = new TextRange(start, end);
+        //        selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+        //                                indexInRun = textRun.IndexOf(word, indexInRun + 1, StringComparison.CurrentCultureIgnoreCase);
+        //                            }
+        //}
+        //position = position.GetPositionAtOffset(textRun.Length);
+        //                    }
+        //                    else
+        //                    {
+        //                        position = position.GetNextContextPosition(LogicalDirection.Forward);
+        //                    }
+        //                }
+        //            }
+
+
+        //                        if (boldWords != null)
+        //            {
+        //                position = flowDocument.ContentStart;
+        //                text = new TextRange(flowDocument.ContentStart, flowDocument.ContentEnd).Text;
+
+        //                // Find the starting index of any substring that matches "word".
+        //                foreach (String word in boldWords)
+        //                {
+        //                    indexInText = text.IndexOf(word, StringComparison.CurrentCultureIgnoreCase);
+
+        //                    while (indexInText != -1)
+        //                    {
+        //                        TextPointer start = position.GetPositionAtOffset(indexInText);
+        //        TextPointer end = start.GetPositionAtOffset(word.Length);
+        //        TextRange selection = new TextRange(start, end);
+        //        selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+        //                        indexInText = text.IndexOf(word, indexInText + 4, StringComparison.CurrentCultureIgnoreCase);
+        //                    }
+        //}
+        //            }
+
+
+
+        private void TodayChanges_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void TodayChanges_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void ClosedVacancy_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void ClosedVacancy_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Sharp_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Sharp_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void JavaScript_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void JavaScript_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void SQL_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void SQL_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void oCwo_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void oCwo_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Distant_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Distant_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void ActiveVacancy_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void ActiveVacancy_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Intrst_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Intrst_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void AnyText_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void AnyText_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+
+
+        private void JavaScript_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Sharp_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void SQL_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void oCwo_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void AnyText_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+
+
+        //private void JavaScript_Checked(object sender, RoutedEventArgs e) => MessageBox.Show(JavaScript.IsChecked.ToString());
+        //private void JavaScript_Unchecked(object sender, RoutedEventArgs e) => MessageBox.Show(JavaScript.IsChecked.ToString());
+        //private void JavaScript_Indeterminate(object sender, RoutedEventArgs e) => MessageBox.Show(JavaScript.IsChecked.ToString());
+
+
+
+
+
+        //private void Test_Click(object sender, RoutedEventArgs e)
+        //{
+        //    MessageBox.Show(string.Format("Sit: {0}", Presentier.ActiveCheckBox));
+        //}
 
         //====================================================
-
-        public void SpisokView(ObservableCollection<Record> Spisok)
+        private void MyGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //MyGrid.row.HeaderCell.Value = String.Format("{0}", row.Index + 1);
-            int e = 2;
-            SC.Post(new SendOrPostCallback(o => { PB.Value = 0; PB.Maximum = 100; }), e);
-            SC.Post(new SendOrPostCallback(o => { PBtext.Text = ""; }), e);
-            SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), e);
+            String text;
+            FlowDocument flowDocument = null;
+
+            if (MyGrid.SelectedItem != null)
+            {
+                RichTextBox1.Document.Blocks.Clear();
+                text = ((Record)MyGrid.SelectedItem).Desc;
+                flowDocument = XamlReader.Parse(text) as FlowDocument;
+                RichTextBox1.Document = flowDocument;
+            }
+        }
+
+
+
+
+        public void SpisokView(ICollectionView SpisokFiltered)
+        {
+            int vacCount = SpisokFiltered.Cast<object>().Count();
+            VacancyCount.Content = vacCount;
+
+            if (vacCount != 0)
+            {
+                SC.Post(new SendOrPostCallback(o => { PB.Value = 0; PB.Maximum = 100; }), 2);
+                SC.Post(new SendOrPostCallback(o => { PBtext.Text = ""; }), 2);
+                SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), 2);
+                MyGrid.ItemsSource = SpisokFiltered;
+                MyGrid.RowHeight = 20;
+                Button1.IsEnabled = true;
+                Button4.IsEnabled = true;
+                Button5.IsEnabled = true;
+                Button3.IsEnabled = true;
+                Button6.IsEnabled = false;
+            }
 
             //MyGrid.ItemsSource = null;
-            MyGrid.ItemsSource = Spisok;
-            MyGrid.RowHeight = 20;
-            MyGrid.Refresh();
-
+            //MyGrid.Refresh();
             //this.DataContext = Spisok;
-
-
-
             //if (MyGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
             //{
             //    var row = (DataGridRow)MyGrid.ItemContainerGenerator.ContainerFromIndex(1);
@@ -183,13 +406,6 @@ namespace WpfApp1
             //    //DataGridRow rowColor = (DataGridRow)dataGridViewMyGroups.ItemContainerGenerator.ContainerFromIndex(number);
             //    //row.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(223, 227, 238));
             //}
-
-
-            Button1.IsEnabled = true;
-            Button4.IsEnabled = true;
-            Button5.IsEnabled = true;
-            Button3.IsEnabled = true;
-            Button6.IsEnabled = false;
         }
 
         public void YapView(ObservableCollection<q> yap)
@@ -204,13 +420,13 @@ namespace WpfApp1
             SC.Post(new SendOrPostCallback(o => { PB.Value = e.Value; PB.Maximum = e.MaxValue; }), e);
             SC.Post(new SendOrPostCallback(o => { PBtext.Text = e.Value + " (" + e.Value2 + ") / " + e.MaxValue; }), e);
             SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), e);
-            
+
             //synchronizationContext.Post(new SendOrPostCallback(o => {MyGrid.ItemsSource = Spisok;}),Spisok);
         }
 
         //====================================================
 
-      
+
 
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
@@ -245,48 +461,127 @@ namespace WpfApp1
 
         private void MyGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            e.Row.Header = (e.Row.GetIndex()+1).ToString();
-        }
-    }
-
-    public class SortAdorner : Adorner
-    {
-        private static Geometry ascGeometry = Geometry.Parse("M 0 4 L 3.5 0 L 7 4 Z");
-
-        private static Geometry descGeometry = Geometry.Parse("M 0 0 L 3.5 4 L 7 0 Z");
-
-        public ListSortDirection Direction { get; private set; }
-
-        public SortAdorner(UIElement element, ListSortDirection dir)
-            : base(element)
-        {
-            this.Direction = dir;
+            e.Row.Header = (e.Row.GetIndex() + 1).ToString();
         }
 
-        protected override void OnRender(DrawingContext drawingContext)
+        private void RichTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            base.OnRender(drawingContext);
+            //TextPointer position = RichTextBox1.Document.ContentStart;
+            //String word = "Требования";
+            //String t = new TextRange(RichTextBox1.Document.ContentStart, RichTextBox1.Document.ContentEnd).Text;
 
-            if (AdornedElement.RenderSize.Width < 20)
-                return;
 
-            TranslateTransform transform = new TranslateTransform
-                (
-                    AdornedElement.RenderSize.Width - 15,
-                    (AdornedElement.RenderSize.Height - 5) / 2
-                );
-            drawingContext.PushTransform(transform);
+            //while (position != null)
+            //{
+            //    if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+            //    {
+            //        string textRun = position.GetTextInRun(LogicalDirection.Forward);
 
-            Geometry geometry = ascGeometry;
-            if (this.Direction == ListSortDirection.Descending)
-                geometry = descGeometry;
-            drawingContext.DrawGeometry(Brushes.Black, null, geometry);
+            //        // Find the starting index of any substring that matches "word".
+            //        int indexInRun = textRun.IndexOf(word);
+            //        if (indexInRun > 0)
+            //        {
+            //            TextPointer start = position.GetPositionAtOffset(indexInRun);
+            //            TextPointer end = start.GetPositionAtOffset(word.Length);
+            //            TextRange selection = new TextRange(start, end);
+            //            selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
 
-            drawingContext.Pop();
+            //        }
+            //    }
+
+            //    position = position.GetNextContextPosition(LogicalDirection.Forward);
+            //}
+
+
+
+            //string keyword = "Требования";
+            //string newString = "!!!!NewString!!!!";
+            //TextRange text = new TextRange(RichTextBox1.Document.ContentStart, RichTextBox1.Document.ContentEnd);
+            //TextPointer current = text.Start.GetInsertionPosition(LogicalDirection.Forward);
+            //while (current != null)
+            //{
+            //    string textInRun = current.GetTextInRun(LogicalDirection.Forward);
+            //    if (!string.IsNullOrWhiteSpace(textInRun))
+            //    {
+            //        int index = textInRun.IndexOf(keyword);
+            //        if (index != -1)
+            //        {
+            //            TextPointer selectionStart = current.GetPositionAtOffset(index, LogicalDirection.Forward);
+            //            TextPointer selectionEnd = selectionStart.GetPositionAtOffset(keyword.Length, LogicalDirection.Forward);
+            //            TextRange selection = new TextRange(selectionStart, selectionEnd);
+            //            selection.Text = newString;
+            //            selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+            //            RichTextBox1.Selection.Select(selection.Start, selection.End);
+            //            RichTextBox1.Focus();
+            //        }
+            //    }
+            //    current = current.GetNextContextPosition(LogicalDirection.Forward);
+            //}
+
+
+
+            //TextRange textRange = new TextRange(RichTextBox1.Document.ContentStart, RichTextBox1.Document.ContentEnd);
+            //textRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);
+
+            //TextRange tr = new TextRange(RichTextBox1.Document.ContentStart), RichTextBox1.Document.ContentEnd); 
+
+
+            //if (RichTextBox1.Document.Text.Contains("прогр"))
+            //{
+            //    RichTextBox1.Select(RichTextBox1.Text.IndexOf("hi"), "hi".Length);
+            //    RichTextBox1.SelectionColor = Color.Aqua;
+            //}
+        }
+
+
+        public class SortAdorner : Adorner
+        {
+            private static Geometry ascGeometry = Geometry.Parse("M 0 4 L 3.5 0 L 7 4 Z");
+
+            private static Geometry descGeometry = Geometry.Parse("M 0 0 L 3.5 4 L 7 0 Z");
+
+            public ListSortDirection Direction { get; private set; }
+
+            public SortAdorner(UIElement element, ListSortDirection dir)
+                : base(element)
+            {
+                this.Direction = dir;
+            }
+
+            protected override void OnRender(DrawingContext drawingContext)
+            {
+                base.OnRender(drawingContext);
+
+                if (AdornedElement.RenderSize.Width < 20)
+                    return;
+
+                TranslateTransform transform = new TranslateTransform
+                    (
+                        AdornedElement.RenderSize.Width - 15,
+                        (AdornedElement.RenderSize.Height - 5) / 2
+                    );
+                drawingContext.PushTransform(transform);
+
+                Geometry geometry = ascGeometry;
+                if (this.Direction == ListSortDirection.Descending)
+                    geometry = descGeometry;
+                drawingContext.DrawGeometry(Brushes.Black, null, geometry);
+
+                drawingContext.Pop();
+            }
+        }
+
+        private void TextBox1_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void AnyTextText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }
-
 
 /*
  * 
@@ -403,16 +698,16 @@ namespace WpfApp1
 
  * 
  *             //Spisok = await Task.Run( () => Model.LoadAsync(xlsloader));
-            //Task<ObservableCollection<Record>> task;
-            //task = Task<ObservableCollection<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader), TaskCreationOptions.LongRunning);
+            //Task<List<Record>> task;
+            //task = Task<List<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader), TaskCreationOptions.LongRunning);
             //Spisok = await task;
             //ObservableCollection<q> yap;
             //yap = await Task.Run(() => Model.AnalizeAsync());
             //View.YapView(yap);
-            //Task<ObservableCollection<Record>> task = new Task<ObservableCollection<Record>>(() => Model.LoadAsync(xlsloader));
+            //Task<List<Record>> task = new Task<List<Record>>(() => Model.LoadAsync(xlsloader));
             //Spisok = await task;
             //task =  Task.Factory.StartNew(() => Model.LoadAsync(xlsloader));
-            //task = Task<ObservableCollection<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader));
+            //task = Task<List<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader));
             //MyEventArgs args = new MyEventArgs();
             //Spisok = Model.Load(xlsloader);
             //Spisok = await Task.Run( () => Model.LoadAsync(xlsloader));
@@ -455,6 +750,23 @@ namespace WpfApp1
 
 
                 //MyGrid.ItemsSource = Spisok;
+                            //FlowDocument content = XamlReader.Load(text) as FlowDocument;
+
+            //MyGrid.
+            //int countTopLevelBlocks = RichTextBox1.Document.Blocks.Count;
+            //RichTextBox1.Document.Blocks.Remove(RichTextBox1.Document.Blocks.LastBlock);
+
+                    if (text[0] == '<') flowDocument = XamlReader.Parse(text) as FlowDocument;
+
+                if (flowDocument !=null)
+                    RichTextBox1.Document = flowDocument;
+                else
+                    RichTextBox1.Document.Blocks.Add(new Paragraph(new Run(text)));
+
+                //String t = new TextRange(RichTextBox1.Document.ContentStart, RichTextBox1.Document.ContentEnd).Text;
+
+                //range.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+
 
  * * 
  */

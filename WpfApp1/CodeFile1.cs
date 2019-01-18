@@ -8,7 +8,7 @@ using System.Windows.Navigation;
 using System.Threading;
 using System.Reflection;
 using System.Windows;
-
+using System.Windows.Documents;
 
 namespace WpfApp1
 {
@@ -110,6 +110,8 @@ namespace WpfApp1
     {
         public static bool ContainsCI(this string text, string value, StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
         {
+
+
             return text.IndexOf(value, stringComparison) >= 0;
         }
     }
@@ -121,13 +123,17 @@ namespace WpfApp1
         public int Value2 { get; set; }
 
         public int MaxValue { get; set; }
-        //public ObservableCollection<Record> Spisok { get; set; }
+        public FlowDocument flowDocument { get; set; }
+        public Record Rec { get; set; }
+
+        //public List<Record> Spisok { get; set; }
 
         //public String Message { get; set; }
     }
 
     public class Record
     {
+        public string MyId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
         public string Zp { get; set; }
@@ -135,24 +141,31 @@ namespace WpfApp1
         public string Town { get; set; }
         public string Resp1 { get; set; }
         public string Req1 { get; set; }
-        public string Dat { get; set; }
+        public DateTime Dat { get; set; }
         public string Opt { get; set; }
-        public StringBuilder Desc { get; set; } = new StringBuilder();
+        public string Desc { get; set; }
         public string link { get; set; }
         public bool Sharp { get; set; }
         public bool JavaScript { get; set; }
+        public bool SQL { get; set; }
+        public bool _1C { get; set; }
         public bool Distant { get; set; }
         public bool Closed { get; set; }
         public DateTime BeginingDate { get; set; }
         public DateTime LastCheckDate { get; set; }
+        public double DaysLong { get; set; }
 
-        public string AllInfo() => Name + Zp + Comp + Town + Resp1 + Req1 + Dat + Opt + Desc.ToString();
+        public bool Interes { get; set; }
+
+        public string AllInfo() => Name + Zp + Comp + Town + Resp1 + Req1 + Dat + Opt + Desc;
     }
 
     public class q
     {
         public string Name { get; set; }
         public int count { get; set; }
+        public double prc { get; set; }
+
         public q(string s)
         { Name = s; count = 0; }
 

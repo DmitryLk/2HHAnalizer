@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="511.796" Width="968.079">
-        <!--Title="MainWindow" Height="511.796" Width="968.079" DataContext="{Binding RelativeSource={RelativeSource Self}}">-->
+        Title="MainWindow" Height="605" Width="1175.6"  >
+    <!--Title="MainWindow" Height="511.796" Width="968.079" DataContext="{Binding RelativeSource={RelativeSource Self}}" >-->
 
     <Window.Resources>
 
@@ -15,51 +15,113 @@
     </Window.Resources>
 
 
-    <Grid Margin="0,0,3.6,0.4">
+    <Grid Margin="0,0,3.6,0.4" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="294*"/>
+            <RowDefinition Height="281*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="TextBox1" Template="{StaticResource TextBoxBaseControlTemplate}" HorizontalAlignment="Left" Height="18" Margin="21,10,0,0" TextWrapping="Wrap" Text="https://krasnodar.hh.ru/catalog/Informacionnye-tehnologii-Internet-Telekom/Programmirovanie-Razrabotka" VerticalAlignment="Top" Width="800"/>
+        <TextBox x:Name="TextBox1" Template="{StaticResource TextBoxBaseControlTemplate}" HorizontalAlignment="Left" Height="18" Margin="21,10,0,0" TextWrapping="Wrap" Text="https://krasnodar.hh.ru/catalog/Informacionnye-tehnologii-Internet-Telekom/Programmirovanie-Razrabotka" VerticalAlignment="Top" Width="687" TextChanged="TextBox1_TextChanged"/>
         <!--<Button x:Name="Button2" Content="Button" HorizontalAlignment="Left" Margin="150,32,0,0" VerticalAlignment="Top" Width="75" Click="Button2_Click" RenderTransformOrigin="3.659,-6.23" Height="18" FontFamily="Verdana" Foreground="White" Background="Black"/>-->
-        <Button x:Name="Button3" Content="Check HH" HorizontalAlignment="Left" Margin="846,50,0,0" VerticalAlignment="Top" Width="93" Click="Button3_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False"/>
-        <Button x:Name="Button5" Content="LoadFromXLS"  HorizontalAlignment="Left" Margin="846,16,0,0" VerticalAlignment="Top" Width="93" Click="Button5_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>
-        <Button x:Name="Button1" Content="Analize"  HorizontalAlignment="Left" Margin="846,118,0,0" VerticalAlignment="Top" Width="93" Click="Button1_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False"/>
+        <Button x:Name="Button3" Content="Parse HH" HorizontalAlignment="Left" Margin="896,5,0,0" VerticalAlignment="Top" Width="80" Click="Button3_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" FontSize="10"/>
+        <Button x:Name="Button5" Content="LoadFromXLS"  HorizontalAlignment="Left" Margin="726,5,0,0" VerticalAlignment="Top" Width="80" Click="Button5_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" FontSize="10"/>
+        <Button x:Name="Button1" Content="Analize"  HorizontalAlignment="Left" Margin="1066,5,0,0" VerticalAlignment="Top" Width="80" Click="Button1_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False" FontSize="10"/>
         <!--<Button x:Name="Button4" Content="Analize"  HorizontalAlignment="Left" Margin="846,149,0,0" VerticalAlignment="Top" Width="93" Click="Button4_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>-->
-        <Button x:Name="Button4" Content="SaveToXLS"  HorizontalAlignment="Left" Margin="847,151,0,0" VerticalAlignment="Top" Width="93" Click="Button4_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False"/>
-        <Button x:Name="Button6" Content="Cancel"  HorizontalAlignment="Left" Margin="847,85,0,0" VerticalAlignment="Top" Width="93" Click="Button6_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False"/>
+        <Button x:Name="Button4" Content="SaveToXLS"  HorizontalAlignment="Left" Margin="811,5,0,0" VerticalAlignment="Top" Width="80" Click="Button4_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False" FontSize="10"/>
+        <Button x:Name="Button6" Content="Cancel"  HorizontalAlignment="Left" Margin="981,5,0,0" VerticalAlignment="Top" Width="80" Click="Button6_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False" FontSize="10"/>
+        <!--<Button x:Name="Bold" Content="bold"  HorizontalAlignment="Left" Margin="1129,247.6,0,0" VerticalAlignment="Top" Width="27" Click="Bold_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" FontSize="10" Grid.Row="1"/>-->
+
+
+        <Canvas Margin="1129,541,0,0" Panel.ZIndex="1" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Button x:Name="Bold" Content="abc"  HorizontalAlignment="Left"  VerticalAlignment="Top" Width="27" Click="Bold_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" FontWeight ="Bold" Background="Black" FontSize="10" Grid.Row="1" Canvas.Top="-43" Canvas.Left="-1"/>
+            <Button x:Name="Color" Content="abc"  HorizontalAlignment="Left"  VerticalAlignment="Top" Width="27" Click="Color_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="Red" Background="Black" FontSize="10" Canvas.Left="-1" Canvas.Top="-19" />
+            <Button x:Name="Auto" Content="auto"  HorizontalAlignment="Left"  VerticalAlignment="Top" Width="27" Click="Auto_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" FontSize="10" Canvas.Left="-1" Canvas.Top="5" />
+        </Canvas>
+
 
         <!--<WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,0">-->
-        <ProgressBar x:Name="PB"  Height="17" Background ="White" HorizontalAlignment="Left" Margin="223,33,0,0" VerticalAlignment="Top" Width="598" BorderThickness="2"/>
+        <ProgressBar x:Name="PB"  Height="17" Background ="White" HorizontalAlignment="Left" Margin="223,33,0,0" VerticalAlignment="Top" Width="485" BorderThickness="2"/>
         <!--<TextBlock Text="{Binding ElementName=MainWindow, Path=PBprc, StringFormat={}{00:0}%}" Width="50" VerticalAlignment="Center" Margin="443,37,0,421.4" HorizontalAlignment="Left" Height="24" />-->
         <!--<TextBlock Text="{Binding ElementName=PB, Path=Value, StringFormat={}{00:0}%}" Width="50" VerticalAlignment="Center" Margin="508,37,0,421" HorizontalAlignment="Left" Height="24" />-->
-        <TextBlock x:Name="PBtext" Text="{Binding Pbprc, StringFormat={}{00:0}%}" Width="80" VerticalAlignment="Center" Margin="478,37,0,421" HorizontalAlignment="Left" Height="24" />
+        <TextBlock x:Name="PBtext" Text="{Binding Pbprc, StringFormat={}{00:0}%}" Width="80" VerticalAlignment="Top" Margin="424,33,0,0" HorizontalAlignment="Left" Height="24" >
+            <TextBlock.BindingGroup>
+                <BindingGroup/>
+            </TextBlock.BindingGroup>
+        </TextBlock>
         <!--"{Binding Name}"-->
-      
+
 
         <!--<TextBlock Text="{Binding ElementName=PB, Path=Value, StringFormat={}{00:0}%}" HorizontalAlignment="Center" Width="50" VerticalAlignment="Center" Margin="494,32,176.8,434.4" />-->
         <!--</WrapPanel>-->
 
-        <TabControl x:Name="TabControl1" HorizontalAlignment="Left" Height="424" Margin="21,32,0,0" VerticalAlignment="Top" Width="809">
+        <TabControl x:Name="TabControl1" HorizontalAlignment="Left" Height="510" Margin="21,32,0,0" VerticalAlignment="Top" Width="700" Grid.RowSpan="2">
             <TabItem x:Name="Grid" Header="Grid">
-                <Grid Background="#FFE5E5E5">
+                <Grid Background="#FFE5E5E5" Margin="0,0,-1,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="51*"/>
+                        <ColumnDefinition Width="642*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
                     <!--<DataGrid x:Name="MyGrid" ItemsSource="{Binding Spisok}" datacontext="{Binding mode= hold}" RowHeight = "20" AutoGenerateColumns="True" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadingRow="MyGrid_LoadingRow">-->
-                    <DataGrid x:Name="MyGrid" ItemsSource="{Binding Spisok}" RowHeight = "20" CanUserSortColumns="true" AutoGenerateColumns="True" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadingRow="MyGrid_LoadingRow">
+                    <DataGrid 
+                        x:Name="MyGrid" 
+                        AutoGenerateColumns="False" 
+                        CanUserAddRows="false" 
+                        RowHeight = "20" 
+                        VirtualizingStackPanel.VirtualizationMode="Recycling" 
+                        CanUserSortColumns="true" 
+                        HorizontalAlignment="Left" 
+                        Height="462" 
+                        Margin="10,10,0,0" 
+                        VerticalAlignment="Top" 
+                        Width="675" 
+                        LoadingRow="MyGrid_LoadingRow" 
+                        Grid.ColumnSpan="2" 
+                        SelectionChanged="MyGrid_SelectionChanged">
+
                         <!--<DataGrid.BindingGroup>
                             <BindingGroup/>
                         </DataGrid.BindingGroup>-->
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="120"/>
+                            <DataGridTextColumn Header="Вакансия" Binding="{Binding Name}" Width="160" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Компания" Binding="{Binding Comp}" Width="100" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="ЗП" Binding="{Binding Zp}" Width="110" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Дней" Binding="{Binding DaysLong, StringFormat=N0}" Width="40" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Дата" Binding="{Binding Dat, StringFormat='{}{0:dd/MM/yyyy}'}" Width="70" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Begin" Binding="{Binding BeginingDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="70" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="End" Binding="{Binding LastCheckDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="70" IsReadOnly="True"/>
+                            <DataGridCheckBoxColumn Header="Инт" Binding="{Binding Interes}" Width="20" IsReadOnly="False"/>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="100" IsReadOnly="True"/>
+                            <!--<DataGridTextColumn Header="Опыт" Binding="{Binding Opt}" Width="100" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Resp" Binding="{Binding Resp1}" Width="100" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Req" Binding="{Binding Req1}" Width="100" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Описание" Binding="{Binding Desc}" Width="100" IsReadOnly="True"/>-->
                         </DataGrid.Columns>
+
+
                         <DataGrid.RowStyle>
                             <Style TargetType="DataGridRow">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Closed}" Value="true">
-                                        <Setter Property="Background" Value="Red"></Setter>
+                                        <Setter Property="Background" Value="LightGray"></Setter>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Sharp}" Value="true">
-                                        <Setter Property="Background" Value="Green"></Setter>
+                                        <Setter Property="Background" Value="LightGreen"></Setter>
                                     </DataTrigger>
+
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Closed}" Value="True" />
+                                            <Condition Binding="{Binding Sharp}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Background" Value="#80c380" />
+                                    </MultiDataTrigger>
+
+
+
                                 </Style.Triggers>
                             </Style>
                         </DataGrid.RowStyle>
@@ -69,7 +131,7 @@
 
             <TabItem x:Name="Stat" Header="Stat">
                 <Grid Background="#FFE5E5E5">
-                    <ListView x:Name="listbox1" HorizontalAlignment="Left" Height="344" Margin="67,25,0,0" VerticalAlignment="Top" Width="270" ItemsSource="{Binding yap}" >
+                    <ListView x:Name="listbox1" HorizontalAlignment="Left" Height="462" Margin="79,10,0,0" VerticalAlignment="Top" Width="270" ItemsSource="{Binding yap}" >
                         <ListView.View>
                             <GridView AllowsColumnReorder="true" >
                                 <GridViewColumn Width="100" DisplayMemberBinding="{Binding Name}">
@@ -85,6 +147,13 @@
                                     </GridViewColumn.Header>
                                 </GridViewColumn>
 
+                                <GridViewColumn Width="60" DisplayMemberBinding="{Binding prc, StringFormat={}{00:0.00}%}">
+                                    <!--<GridViewColumn Width="60" DisplayMemberBinding="{Binding prc, StringFormat=N2}">-->
+                                    <GridViewColumn.Header>
+                                        <GridViewColumnHeader Tag="prc" Click="LBColumnHeader_Click">prc</GridViewColumnHeader>
+                                    </GridViewColumn.Header>
+                                </GridViewColumn>
+
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -93,15 +162,59 @@
             <TabItem x:Name="Browser" Header="Browser">
                 <Grid Background="#FFE5E5E5">
                     <!--<WebBrowser x:Name="WebBrowser1" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784" LoadCompleted="WebBrowser_LoadCompleted"/>-->
-                    <WebBrowser x:Name="WebBrowser1" HorizontalAlignment="Left" Height="376" Margin="10,10,0,0" VerticalAlignment="Top" Width="784"/>
+                    <WebBrowser x:Name="WebBrowser1" HorizontalAlignment="Left" Height="462" Margin="10,10,0,0" VerticalAlignment="Top" Width="675"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="html" Header="html">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox x:Name="TextBox2" HorizontalAlignment="Right" Height="376" Margin="0,10,10,0" Text="TextBox" VerticalAlignment="Top" Width="784" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" AcceptsReturn="True"/>
+                    <TextBox x:Name="TextBox2" HorizontalAlignment="Right" Height="462" Margin="0,10,9.6,0" Text="TextBox" VerticalAlignment="Top" Width="675" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" AcceptsReturn="True"/>
                 </Grid>
             </TabItem>
         </TabControl>
+
+
+        <CheckBox x:Name="ActiveVacancy" IsChecked="{Binding ActiveCheckBox}" Content="Active" HorizontalAlignment="Left" Margin="21,252.4,0,0" VerticalAlignment="Top" Checked="ActiveVacancy_Checked" Unchecked="ActiveVacancy_Unchecked" Grid.Row="1"/>
+        <CheckBox x:Name="ClosedVacancy" IsChecked="{Binding ClosedCheckBox}" Content="Closed" HorizontalAlignment="Left" Margin="76,252.6,0,0" VerticalAlignment="Top" Checked="ClosedVacancy_Checked" Unchecked="ClosedVacancy_Unchecked" Grid.Row="1"/>
+        <CheckBox x:Name="Sharp" IsChecked="{Binding SharpCheckBox}" Content="C#" HorizontalAlignment="Left" Margin="424,252.6,0,0" VerticalAlignment="Top" Checked="Sharp_Checked" Unchecked="Sharp_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="Sharp_Indeterminate"/>
+        <CheckBox x:Name="JavaScript" IsChecked="{Binding JavaScriptCheckBox}" Content="JavaScript" HorizontalAlignment="Left" Margin="463,252.6,0,0" VerticalAlignment="Top" Checked="JavaScript_Checked" Unchecked="JavaScript_Unchecked" IsThreeState="True" Indeterminate="JavaScript_Indeterminate" Grid.Row="1"/>
+        <CheckBox x:Name="SQL" IsChecked="{Binding SQLCheckBox}" Content="SQL" HorizontalAlignment="Left" Margin="541,252.6,0,0" VerticalAlignment="Top" Checked="SQL_Checked" Unchecked="SQL_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="SQL_Indeterminate"/>
+        <CheckBox x:Name="oCwo" IsChecked="{Binding oneCCheckBox}" Content="1C" HorizontalAlignment="Left" Margin="589,252.6,0,0" VerticalAlignment="Top" Checked="oCwo_Checked" Unchecked="oCwo_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="oCwo_Indeterminate"/>
+        <CheckBox x:Name="Distant" IsChecked="{Binding DistantCheckBox}" Content="удаленно" HorizontalAlignment="Left" Margin="140,252.6,0,0" VerticalAlignment="Top" Checked="Distant_Checked" Unchecked="Distant_Unchecked" Grid.Row="1"/>
+        <CheckBox x:Name="TodayChanges" IsChecked="{Binding TodayChangesCheckBox}" Content="TodayChanges" HorizontalAlignment="Left" Margin="267,252.6,0,0" VerticalAlignment="Top" Checked="TodayChanges_Checked" Unchecked="TodayChanges_Unchecked" Grid.Row="1"/>
+        <CheckBox x:Name="Intrst" IsChecked="{Binding IntrstCheckBox}" Content="Intrst" HorizontalAlignment="Left" Margin="216,252.6,0,0" VerticalAlignment="Top" Checked="Intrst_Checked" Unchecked="Intrst_Unchecked" Grid.Row="1"/>
+
+        <CheckBox x:Name="AnyText" IsChecked="{Binding AnyTextCheckBox}" Content="" HorizontalAlignment="Left" Margin="630,252.6,0,0" VerticalAlignment="Top" Checked="AnyText_Checked" Unchecked="AnyText_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="AnyText_Indeterminate"/>
+        <TextBox x:Name="AnyTextText" Height="21" TextWrapping="Wrap" Text="any text" VerticalAlignment="Top" Margin="650,249.6,0,0" RenderTransformOrigin="0.5,0.5" Grid.Row="1" HorizontalAlignment="Left" BorderBrush="Black" Width="70">
+
+        </TextBox>
+
+
+
+
+
+
+        <!--<TextBox Text="{Binding SelectedItem.Desc, ElementName=MyGrid}" ScrollViewer.VerticalScrollBarVisibility="Auto" Height="240" Margin="726,29,10.4,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>-->
+
+
+        <Label x:Name="VacancyCount" Content="" HorizontalAlignment="Left" Margin="181,30,0,0" VerticalAlignment="Top" Width="42"/>
+
+
+
+        <RichTextBox x:Name="RichTextBox1" HorizontalAlignment="Left" Height="540" Margin="725,25,0,0" VerticalAlignment="Top" Width="430" ScrollViewer.VerticalScrollBarVisibility="Auto" FontSize="10" Grid.RowSpan="2" TextChanged="RichTextBox_TextChanged" >
+            <FlowDocument>
+                <Paragraph>
+                    <!--<Run Text="{Binding SelectedItem.Desc, ElementName=MyGrid}"/>-->
+                    <!--<Run Text="123"/>
+                    <Run Text="456"/>-->
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+
+        <Label x:Name="Alert" HorizontalAlignment="Left" Height="48" Margin="791,66,0,0" Content="" VerticalAlignment="Top" Width="306" Foreground="#FFDA1695" FontSize="36" FontWeight="Bold" BorderBrush="{x:Null}" Background="{x:Null}"/>
+
+
+
+
 
         <!--<ProgressBar x:Name="PB" Template="{StaticResource customTemplate}" HorizontalAlignment="Left" Height="45" Margin="389,16,0,0" VerticalAlignment="Top" Width="404" BorderThickness="2" Grid.ColumnSpan="2"></ProgressBar>-->
 

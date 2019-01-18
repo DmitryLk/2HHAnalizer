@@ -25,24 +25,37 @@ using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
 using System.Threading;
-
-
+using System.Globalization;
+using System.Windows.Markup;
 
 namespace WpfApp1
 {
     public interface ILoader
     {
-        Task Load(ObservableCollection<Record> spisok, CancellationToken token, IModel m);
+        Task Load(IList<Record> spisok, CancellationToken token, IModel m);
         event EventHandler<MyEventArgs> Changed;
+        event EventHandler<MyEventArgs> StartPause;
+        event EventHandler<MyEventArgs> EndPause;
+
         //void Load(IModel m);
         //void NavigateEv(object sender, RoutedEventArgs e);
     }
 
+    enum XF
+    {
+        Name = 1,
+        Subtract = 4,
+        Multiply = 8,
+        Divide = 16
+    }
 
 
     public class XLSLoader : XLSWorker, ILoader//, INotifyPropertyChanged
     {
         public event EventHandler<MyEventArgs> Changed = delegate { };
+        public event EventHandler<MyEventArgs> StartPause = delegate { };
+        public event EventHandler<MyEventArgs> EndPause = delegate { };
+
         private readonly SynchronizationContext SC;
 
         public XLSLoader(SynchronizationContext SC)
@@ -50,7 +63,7 @@ namespace WpfApp1
             this.SC = SC;
         }
 
-        public async Task Load(ObservableCollection<Record> Spisok, CancellationToken token, IModel m)
+        public async Task Load(IList<Record> Spisok, CancellationToken token, IModel m)
         {
            
             int i, j, k;
@@ -61,9 +74,11 @@ namespace WpfApp1
             MyEventArgs args = new MyEventArgs();
             //double value = 0;
             DateTime tmpdate = new DateTime(1900, 1, 1);
-
-
+            //DateTime tmpDate;
+            //String tmpString;
             //UpdateProgressBarDelegate updProgress = new UpdateProgressBarDelegate(PB.SetValue);
+
+     
 
             range = null;
             string path = Directory.GetCurrentDirectory() + "\\Spisok.xlsx";
@@ -89,11 +104,12 @@ namespace WpfApp1
             range = workSheet.get_Range((Excel.Range)workSheet.Cells[2, 1], (Excel.Range)workSheet.Cells[j + 1, k]);
             tmp = range.Value2;
 
-            SC.Post(new SendOrPostCallback(o => { Spisok.Clear(); }), 1);
-            
+            //SC.Post(new SendOrPostCallback(o => { Spisok.Clear(); }), 1);
+            Spisok.Clear();
+
 
             //rec.Clear();
-            //public IObservableCollection<Record> spisok = new ObservableCollection<Record>();
+            //public IList<Record> spisok = new List<Record>();
 
             args.MaxValue = j;
             args.Value = 0;
@@ -103,37 +119,53 @@ namespace WpfApp1
             for (i = 1; i <= j; i++)
             {
                 rec = new Record();
-                rec.Name = tmp[i, 1]?.ToString();
+                rec.Name = tmp[i, (int)XF.Name]?.ToString();
                 rec.Zp = tmp[i, 2]?.ToString();
                 rec.Comp = tmp[i, 3]?.ToString();
                 rec.Town = tmp[i, 4]?.ToString();
                 rec.Resp1 = tmp[i, 5]?.ToString();
                 rec.Req1 = tmp[i, 6]?.ToString();
-                rec.Dat = tmp[i, 7]?.ToString();
+
+
+                //tmpString = Regex.Replace(tmp[i, 7]?.ToString(), @"\u00A0", " ");
+                //if (Regex.Match(tmpString, @"\d+").Length == 1) tmpString = "0" + tmpString;
+                //DateTime.TryParseExact(tmpString, "dd MMMMM", null, DateTimeStyles.None, out tmpDate);
+                //rec.Dat = tmpDate;
+                rec.Dat = tmpdate.AddDays(Convert.ToDouble(tmp[i, 7]) - 2);
                 rec.Opt = tmp[i, 8]?.ToString();
-                rec.Desc.Append(tmp[i, 9]?.ToString());
+
+                rec.Desc = tmp[i, 9]?.ToString();
+                if (rec.Desc[0] != '<')
+                    rec.Desc = ConvertToFlowDocumentString(rec.Desc, new String[] { "Требования" });
+
+                //ConvertToFlowDocumentString(tmp[i, 9]?.ToString(), new String[] { "Требования" })
+
+             
+
+
                 rec.Id = tmp[i, 10]?.ToString();
                 rec.link = tmp[i, 11]?.ToString();
                 rec.Sharp = Convert.ToBoolean(tmp[i, 12]);
                 rec.JavaScript = Convert.ToBoolean(tmp[i, 13]);
-                rec.Distant = Convert.ToBoolean(tmp[i, 14]);
-                rec.Closed = Convert.ToBoolean(tmp[i, 15]);
-                rec.BeginingDate = tmpdate.AddDays(Convert.ToDouble(tmp[i, 16]) - 2);
-                rec.LastCheckDate = tmpdate.AddDays(Convert.ToDouble(tmp[i, 17]) - 2);
+                rec.SQL = Convert.ToBoolean(tmp[i, 14]);
+                rec._1C = Convert.ToBoolean(tmp[i, 15]);
+                rec.Distant = Convert.ToBoolean(tmp[i, 16]);
+                rec.Closed = Convert.ToBoolean(tmp[i, 17]);
+                rec.BeginingDate = tmpdate.AddDays(Convert.ToDouble(tmp[i, 18]) - 2);
+                rec.LastCheckDate = tmpdate.AddDays(Convert.ToDouble(tmp[i, 19]) - 2);
 
-                SC.Post(new SendOrPostCallback(o => { Spisok.Add(rec); }),1);
-              
+                if (rec.BeginingDate < rec.Dat) rec.DaysLong = (rec.LastCheckDate - rec.BeginingDate).TotalDays; else rec.DaysLong = (rec.LastCheckDate - rec.Dat).TotalDays;
+
+                if (k > 20) rec.Interes = Convert.ToBoolean(tmp[i, 21]); else rec.Interes = false;
 
 
-
-
-
+                //SC.Post(new SendOrPostCallback(o => { Spisok.Add(rec); }), 1);
+                Spisok.Add(rec);
 
                 args.Value = i;
                 Changed?.Invoke(this, args);
 
                 await Task.Delay(1);
-
 
                 //Application.Current.Dispatcher.BeginInvoke(new Action(() => { PB.Value= ++value; }));
                 //System.Threading.Thread.Sleep(10);
@@ -141,11 +173,78 @@ namespace WpfApp1
                 //Pbprc = value / 350 * 100;
             }
             QuitExcel();
+
+
+          
+            if (Spisok.GroupBy(p => p.Id).Select(g => new { Name = g.Key, MyCount = g.Count() }).Max(n => n.MyCount)>1)
+                throw new InvalidOperationException("2 одинаковые записи");
+
+
+
         }
     }
 
+    public class CommonLoader
+    {
 
-    public class XLSWorker
+
+        protected String ConvertToFlowDocumentString(String sbDescString, String[] boldWords)
+        {
+            int indexInRun;
+            FlowDocument flowDocument = null;
+
+            if (sbDescString[0] == '<') flowDocument = XamlReader.Parse(sbDescString) as FlowDocument;
+
+            if (flowDocument == null)
+            {
+                flowDocument = new FlowDocument();
+                flowDocument.Blocks.Clear();
+                flowDocument.Blocks.Add(new Paragraph(new Run(sbDescString)));
+            }
+
+         
+
+            if (boldWords != null)
+            {
+                TextPointer position = flowDocument.ContentStart;
+                while (position != null)
+                {
+                    if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+                    {
+                        string textRun = position.GetTextInRun(LogicalDirection.Forward);
+
+                        // Find the starting index of any substring that matches "word".
+                        foreach (String word in boldWords)
+                        {
+                            indexInRun = textRun.IndexOf(word);
+                            if (indexInRun >= 0)
+                            {
+                                TextPointer start = position.GetPositionAtOffset(indexInRun);
+                                TextPointer end = start.GetPositionAtOffset(word.Length);
+                                TextRange selection = new TextRange(start, end);
+                                selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+                            }
+
+                        }
+                    }
+                    position = position.GetNextContextPosition(LogicalDirection.Forward);
+                }
+            }
+
+           
+
+
+            sbDescString = XamlWriter.Save(flowDocument);
+            return sbDescString;
+
+
+        }
+
+
+    }
+
+
+    public class XLSWorker : CommonLoader
     {
         protected Excel.Application excelApp;
         protected Excel.Workbook workBook;
@@ -153,7 +252,7 @@ namespace WpfApp1
         protected Excel.Range range;
         protected Process[] excelProcsOld;
 
-        public virtual void QuitExcel()
+        public void QuitExcel()
         {
             object misValue = System.Reflection.Missing.Value;
             IntPtr xAsIntPtr = new IntPtr(excelApp.Hwnd);

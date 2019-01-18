@@ -11,15 +11,21 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Reflection;
 using System.Collections.ObjectModel;
-
+using System.Globalization;
+using System.Windows.Markup;
+using System.Windows.Documents;
+using System.Windows;
 
 
 namespace WpfApp1
 {
 
-    class WebLoader : ILoader
+    class WebLoader : CommonLoader, ILoader
     {
         public event EventHandler<MyEventArgs> Changed = delegate { };
+        public event EventHandler<MyEventArgs> StartPause = delegate { };
+        public event EventHandler<MyEventArgs> EndPause = delegate { };
+
         private readonly string webs;
         private WebBrowser wb { get; }
         private readonly SynchronizationContext SC;
@@ -31,49 +37,53 @@ namespace WpfApp1
             this.SC = SC;
         }
 
-        private async Task<HtmlDocument> GetDocument2(string link)
-        {
-            string HTML;
-            HtmlDocument hDocument;
-            object doc1;
+        //private async Task<HtmlDocument> GetDocument2(string link)
+        //{
+        //    string HTML;
+        //    HtmlDocument hDocument;
+        //    object doc1;
 
-            //MyWaitable wbwait = new MyWaitable();
-
-
-            MyWebBrowserAwaitable PageLoading = new MyWebBrowserAwaitable(wb);
-            wb.Navigate(new Uri(link));
-            doc1 = await PageLoading;
+        //    //MyWaitable wbwait = new MyWaitable();
 
 
+        //    MyWebBrowserAwaitable PageLoading = new MyWebBrowserAwaitable(wb);
+        //    wb.Navigate(new Uri(link));
+        //    doc1 = await PageLoading;
 
-            //mshtml.IHTMLDocument2 doc2 = wb.Document as mshtml.IHTMLDocument2;
-            mshtml.IHTMLDocument2 doc2 = doc1 as mshtml.IHTMLDocument2;
-            HTML = doc2.body.outerHTML;
 
-            hDocument = new HtmlDocument();
-            hDocument.LoadHtml(HTML);
-            return hDocument;
 
-        }
+        //    //mshtml.IHTMLDocument2 doc2 = wb.Document as mshtml.IHTMLDocument2;
+        //    mshtml.IHTMLDocument2 doc2 = doc1 as mshtml.IHTMLDocument2;
+        //    HTML = doc2.body.outerHTML;
+
+        //    hDocument = new HtmlDocument();
+        //    hDocument.LoadHtml(HTML);
+        //    return hDocument;
+
+        //}
+
+        //https://krasnodar.hh.ru/search/vacancy?area=1&clusters=true&enable_snippets=true&specialization=1.221&page=1
+        //https://krasnodar.hh.ru/search/vacancy?area=1&clusters=true&enable_snippets=true&specialization=1.221&page-1
 
         private async Task<HtmlDocument> GetDocument(string link)
         {
             string HTML;
-            HtmlDocument hDocument;
+            HtmlDocument hDocument = null;
             object doc1 = null;
 
             doc1 = await wb.NavigateAsync(link, SC);
-            mshtml.IHTMLDocument2 doc2 = doc1 as mshtml.IHTMLDocument2;
-            HTML = doc2.body.outerHTML;
 
-            HTML = HTML.Replace("&nbsp;", " ");
-            //HTML.Replace("&nbsp;", string.Empty);
+            if (doc1 is mshtml.IHTMLDocument2)
+            {
+                mshtml.IHTMLDocument2 doc2 = doc1 as mshtml.IHTMLDocument2;
+                HTML = doc2.body.outerHTML;
+                HTML = HTML.Replace("&nbsp;", " ");
+                //HTML.Replace("&nbsp;", string.Empty);
+                //HTML = HtmlEntity.DeEntitize(HTML);
+                hDocument = new HtmlDocument();
+                hDocument.LoadHtml(HTML);
+            }
 
-
-
-            //HTML = HtmlEntity.DeEntitize(HTML);
-            hDocument = new HtmlDocument();
-            hDocument.LoadHtml(HTML);
             return hDocument;
 
             //await Application.Current.Dispatcher.BeginInvoke(new Action(async () => { await wb.NavigateAsync(link); }));
@@ -82,17 +92,21 @@ namespace WpfApp1
         }
 
 
-        public async Task Load(ObservableCollection<Record> Spisok, CancellationToken token, IModel m)
+        public async Task Load(IList<Record> Spisok, CancellationToken token, IModel m)
         {
-            int p;
+            int _p;
             HtmlNodeCollection nodes;
             HtmlNode root;
             HtmlDocument document2, hDocument;
             Record rec, rec2;
+            //IEnumerable<Record> rec3;
             string text;
             MyEventArgs args = new MyEventArgs();
             Random rnd = new Random();
-            IEnumerable<Record> rec3;
+            StringBuilder SBDesc = new StringBuilder();
+            DateTime tmpDate;
+            string tmpString;
+            char searchChar1, searchChar2;
 
             //await GetDocument(webs);
 
@@ -110,12 +124,29 @@ namespace WpfApp1
 
             hDocument = await GetDocument(webs);
 
+            searchChar1 = '/'; searchChar2 = '-';
             text = hDocument.DocumentNode.SelectSingleNode("//div[@data-qa='vacancies-total-found']")?.InnerText ?? "";
             text = Regex.Match(text, @"\d+").Value;
-            if (!Int32.TryParse(text, out p)) throw new ArgumentException("Vacancy count error");
-            args.MaxValue = p;
 
-            p = 0;
+            if (!Int32.TryParse(text, out _p))
+            {
+                searchChar1 = '&'; searchChar2 = '=';
+                
+                text = hDocument.DocumentNode.SelectSingleNode("//h1[@class='header' and @data-qa='page-title']")?.InnerText ?? "";
+                text = Regex.Replace(text, @"<[^>]+>|&nbsp;", "").Trim();
+                text = Regex.Replace(text, @" ", "").Trim();
+                text = Regex.Match(text, @"\d+").Value;
+                if (!Int32.TryParse(text, out _p)) throw new ArgumentException("Vacancy count error");
+
+            }
+
+       
+
+
+
+            args.MaxValue = _p;
+
+            _p = 0;
             nodes = hDocument.DocumentNode.SelectNodes("//div[@class='vacancy-serp-item ' or @class='vacancy-serp-item  vacancy-serp-item_premium']");
             while (nodes != null)
             {
@@ -126,63 +157,90 @@ namespace WpfApp1
 
                     // теперь надо узнать есть ли уже такой Id в Spisok
                     rec2 = null;
-                    rec3 = null;
-                    rec3 = Spisok.Where(c => c.Id == text);
-                    
+                    //rec3 = null;
+                    rec2 = (Spisok as List<Record>).Find(c => c.Id == text);
+                    //rec3 = Spisok.Where(c => c.Id == text);
 
-                    //rec2 = null;
-                    //rec2 = Spisok.Find(c => c.Id == text);
-
-                    if (rec3.Count<Record>() == 0)
+                    //if (rec3.Count<Record>() == 0)
+                    if (rec2 == null)
                     {
                         // Новая запись
                         rec = new Record();
-                        rec.Name = node.SelectSingleNode(".//div[@class='search-item-name']")?.InnerText ?? "";
+                        rec.Name = node.SelectSingleNode(".//div[@class='resume-search-item__name']")?.InnerText ?? "";
                         rec.link = node.SelectSingleNode(".//a[@class='bloko-link HH-LinkModifier']")?.Attributes["href"].Value;
                         rec.Zp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__compensation']")?.InnerText ?? "";
                         rec.Comp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "";
                         rec.Town = node.SelectSingleNode(".//span[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "";
                         rec.Resp1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_responsibility']")?.InnerText ?? "";
                         rec.Req1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_requirement']")?.InnerText ?? "";
-                        rec.Dat = node.SelectSingleNode(".//span[@class='vacancy-serp-item__publication-date']")?.InnerText ?? "";
-                        rec.Id = text;
 
+
+                        tmpString = node.SelectSingleNode(".//span[@class='vacancy-serp-item__publication-date']")?.InnerText ?? "";
+                        if (Regex.Match(tmpString, @"\d+").Length == 1) tmpString = "0" + tmpString;
+                        if (DateTime.TryParseExact(Regex.Replace(tmpString, @"\u00A0", " "), "dd MMMMM", null, DateTimeStyles.None, out tmpDate))
+                            rec.Dat = tmpDate; 
+                        else
+                            rec.Dat = DateTime.Now;
+
+                        rec.Id = text;
                         rec.BeginingDate = DateTime.Now;
                         rec.LastCheckDate = DateTime.Now;
 
+                        if (rec.Dat > DateTime.Now)
+                            rec.Dat = rec.Dat.AddYears(-1);
+
+
+
+                        rec.DaysLong = (rec.LastCheckDate - rec.Dat).TotalDays;
+
+
                         // Случайная пауза.
-                        await Task.Delay(rnd.Next(4000, 10000));
+                        StartPause?.Invoke(this, args);
+                        await Task.Delay(rnd.Next(6000, 15000));
+                        EndPause?.Invoke(this, args);
 
                         document2 = await GetDocument(rec.link);
-                        rec.Opt = document2.DocumentNode.SelectSingleNode("(//div[@class='bloko-gap bloko-gap_bottom'])[3]")?.InnerText ?? "";
-                        root = document2.DocumentNode.SelectSingleNode("//div[@class='g-user-content' or @data-qa='vacancy-description']");
-
-                        foreach (HtmlNode node2 in root.DescendantsAndSelf())
+                        if (document2 != null)
                         {
-                            if (!node2.HasChildNodes)
+                            rec.Opt = document2.DocumentNode.SelectSingleNode("(//div[@class='bloko-gap bloko-gap_bottom'])[3]")?.InnerText ?? "";
+                            root = document2.DocumentNode.SelectSingleNode("//div[@class='g-user-content' or @data-qa='vacancy-description']");
+                            SBDesc.Clear();
+                            foreach (HtmlNode node2 in root.DescendantsAndSelf())
                             {
-                                text = node2.InnerText;
-                                if (!string.IsNullOrWhiteSpace(text))
-                                    rec.Desc.AppendLine(text);
+                                if (!node2.HasChildNodes)
+                                {
+                                    text = node2.InnerText;
+                                    if (!string.IsNullOrWhiteSpace(text))
+                                        SBDesc.AppendLine(text);
+                                }
                             }
+                            rec.Desc = ConvertToFlowDocumentString(SBDesc.ToString(), new String[] { "Требования" });
                         }
 
+
+
+                        //rec.Desc = XamlWriter.Save(SBDesc.ToString());
+                        //rec.Desc = SBDesc.ToString();
+                        // Преобразовать SBDesc.ToString() во FlowDocument
                         //yap.ForEach<q>(p => p.count = spisok.Count(t => t.AllInfo().СontainsCI(p.Name) || t.AllInfo().СontainsCI(p.NameRus())));
                         rec.Sharp = rec.AllInfo().ContainsCI("C#") || rec.AllInfo().ContainsCI("С#") || rec.AllInfo().ContainsCI(".NET");
                         rec.JavaScript = rec.AllInfo().ContainsCI("JavaScript");
+                        rec.SQL = rec.AllInfo().ContainsCI("SQL");
+                        rec._1C = rec.AllInfo().ContainsCI("1C") || rec.AllInfo().ContainsCI("1С");
                         rec.Distant = rec.AllInfo().ContainsCI("удал");
                         rec.Closed = false;
 
-                        SC.Post(new SendOrPostCallback(o => { Spisok.Add(rec); }), 1);
-                        //Spisok.Add(rec);
+                        //SC.Post(new SendOrPostCallback(o => { Spisok.Add(rec); }), 1);
+                        Spisok.Add(rec);
                         args.Value2++;
                     }
                     else
                     {
                         // Уже есть
-                        rec2 = rec3.First<Record>();
+                        // rec2 = rec3.First<Record>();
                         rec2.LastCheckDate = DateTime.Now;
                         rec2.Closed = false;
+                        if (rec2.BeginingDate < rec2.Dat) rec2.DaysLong = (rec2.LastCheckDate - rec2.BeginingDate).TotalDays; else rec2.DaysLong = (rec2.LastCheckDate - rec2.Dat).TotalDays;
                     }
 
                     //Dispatcher.Invoke(updProgress, new object[] { ProgressBar.ValueProperty, ++value });
@@ -194,8 +252,13 @@ namespace WpfApp1
 
                 }
 
+                // Случайная пауза.
+                StartPause?.Invoke(this, args);
+                await Task.Delay(rnd.Next(6000, 15000));
+                EndPause?.Invoke(this, args);
 
-                hDocument = await GetDocument(webs + "/page-" + ++p);
+
+                hDocument = await GetDocument(webs + searchChar1 + "page" + searchChar2 + ++_p);
                 nodes = hDocument.DocumentNode.SelectNodes("//div[@class='vacancy-serp-item ' or @class='vacancy-serp-item  vacancy-serp-item_premium']");
             }
 
@@ -208,7 +271,7 @@ namespace WpfApp1
         }
 
 
-
+    
 
 
         /*
@@ -227,9 +290,8 @@ namespace WpfApp1
             TextBox2.Text = text + "\r\n" + HTML;
         }
         */
-
         /*
-        public void LoadAsync(ObservableCollection<Record> Spisok)
+        public void LoadAsync(List<Record> Spisok)
         {
 
             //UpdateProgressBarDelegate updProgress = new UpdateProgressBarDelegate(PB.SetValue);
