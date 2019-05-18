@@ -156,17 +156,19 @@ namespace WpfApp1
         public double DaysLong { get; set; }
 
         public bool Interes { get; set; }
+        public string Rating { get; set; }
+
 
         public string AllInfo() => Name + Zp + Comp + Town + Resp1 + Req1 + Dat + Opt + Desc;
     }
 
-    public class q
+    public class AnaliseType
     {
         public string Name { get; set; }
         public int count { get; set; }
         public double prc { get; set; }
 
-        public q(string s)
+        public AnaliseType(string s)
         { Name = s; count = 0; }
 
         public string NameRus() => Name.Replace("C", "С");

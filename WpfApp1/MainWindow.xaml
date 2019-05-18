@@ -28,7 +28,7 @@
         <!--<Button x:Name="Button2" Content="Button" HorizontalAlignment="Left" Margin="150,32,0,0" VerticalAlignment="Top" Width="75" Click="Button2_Click" RenderTransformOrigin="3.659,-6.23" Height="18" FontFamily="Verdana" Foreground="White" Background="Black"/>-->
         <Button x:Name="Button3" Content="Parse HH" HorizontalAlignment="Left" Margin="896,5,0,0" VerticalAlignment="Top" Width="80" Click="Button3_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" FontSize="10"/>
         <Button x:Name="Button5" Content="LoadFromXLS"  HorizontalAlignment="Left" Margin="726,5,0,0" VerticalAlignment="Top" Width="80" Click="Button5_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" FontSize="10"/>
-        <Button x:Name="Button1" Content="Analize"  HorizontalAlignment="Left" Margin="1066,5,0,0" VerticalAlignment="Top" Width="80" Click="Button1_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False" FontSize="10"/>
+        <Button x:Name="Button1" Content="Analize"  HorizontalAlignment="Left" Margin="1066,5,0,0" VerticalAlignment="Top" Width="74" Click="Button1_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False" FontSize="10"/>
         <!--<Button x:Name="Button4" Content="Analize"  HorizontalAlignment="Left" Margin="846,149,0,0" VerticalAlignment="Top" Width="93" Click="Button4_Click"  RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black"/>-->
         <Button x:Name="Button4" Content="SaveToXLS"  HorizontalAlignment="Left" Margin="811,5,0,0" VerticalAlignment="Top" Width="80" Click="Button4_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False" FontSize="10"/>
         <Button x:Name="Button6" Content="Cancel"  HorizontalAlignment="Left" Margin="981,5,0,0" VerticalAlignment="Top" Width="80" Click="Button6_Click" RenderTransformOrigin="1.017,-0.112" Height="19" FontFamily="Verdana" Foreground="White" Background="Black" IsEnabled="False" FontSize="10"/>
@@ -93,6 +93,7 @@
                             <DataGridTextColumn Header="Дата" Binding="{Binding Dat, StringFormat='{}{0:dd/MM/yyyy}'}" Width="70" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Begin" Binding="{Binding BeginingDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="70" IsReadOnly="True"/>
                             <DataGridTextColumn Header="End" Binding="{Binding LastCheckDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="70" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Оц" Binding="{Binding Rating}" Width="20" IsReadOnly="False"/>
                             <DataGridCheckBoxColumn Header="Инт" Binding="{Binding Interes}" Width="20" IsReadOnly="False"/>
                             <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="100" IsReadOnly="True"/>
                             <!--<DataGridTextColumn Header="Опыт" Binding="{Binding Opt}" Width="100" IsReadOnly="True"/>
@@ -131,7 +132,11 @@
 
             <TabItem x:Name="Stat" Header="Stat">
                 <Grid Background="#FFE5E5E5">
-                    <ListView x:Name="listbox1" HorizontalAlignment="Left" Height="462" Margin="79,10,0,0" VerticalAlignment="Top" Width="270" ItemsSource="{Binding yap}" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="689*"/>
+                    </Grid.ColumnDefinitions>
+                    <ListView x:Name="listbox1" HorizontalAlignment="Left" Height="462" Margin="74.2,10,0,0" VerticalAlignment="Top" Width="270" ItemsSource="{Binding yap}" Grid.Column="1" >
                         <ListView.View>
                             <GridView AllowsColumnReorder="true" >
                                 <GridViewColumn Width="100" DisplayMemberBinding="{Binding Name}">
@@ -177,8 +182,10 @@
         <CheckBox x:Name="ClosedVacancy" IsChecked="{Binding ClosedCheckBox}" Content="Closed" HorizontalAlignment="Left" Margin="76,252.6,0,0" VerticalAlignment="Top" Checked="ClosedVacancy_Checked" Unchecked="ClosedVacancy_Unchecked" Grid.Row="1"/>
         <CheckBox x:Name="Sharp" IsChecked="{Binding SharpCheckBox}" Content="C#" HorizontalAlignment="Left" Margin="424,252.6,0,0" VerticalAlignment="Top" Checked="Sharp_Checked" Unchecked="Sharp_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="Sharp_Indeterminate"/>
         <CheckBox x:Name="JavaScript" IsChecked="{Binding JavaScriptCheckBox}" Content="JavaScript" HorizontalAlignment="Left" Margin="463,252.6,0,0" VerticalAlignment="Top" Checked="JavaScript_Checked" Unchecked="JavaScript_Unchecked" IsThreeState="True" Indeterminate="JavaScript_Indeterminate" Grid.Row="1"/>
-        <CheckBox x:Name="SQL" IsChecked="{Binding SQLCheckBox}" Content="SQL" HorizontalAlignment="Left" Margin="541,252.6,0,0" VerticalAlignment="Top" Checked="SQL_Checked" Unchecked="SQL_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="SQL_Indeterminate"/>
-        <CheckBox x:Name="oCwo" IsChecked="{Binding oneCCheckBox}" Content="1C" HorizontalAlignment="Left" Margin="589,252.6,0,0" VerticalAlignment="Top" Checked="oCwo_Checked" Unchecked="oCwo_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="oCwo_Indeterminate"/>
+
+        <CheckBox x:Name="SQL" IsChecked="{Binding FrontCheckBox}" Content="Front" HorizontalAlignment="Left" Margin="540,252.6,0,0" VerticalAlignment="Top" Checked="SQL_Checked" Unchecked="SQL_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="SQL_Indeterminate"/>
+        <CheckBox x:Name="oCwo" IsChecked="{Binding oneCCheckBox}" Content="1C" HorizontalAlignment="Left" Margin="592,252.6,0,0" VerticalAlignment="Top" Checked="oCwo_Checked" Unchecked="oCwo_Unchecked" Grid.Row="1" IsThreeState="True" Indeterminate="oCwo_Indeterminate"/>
+
         <CheckBox x:Name="Distant" IsChecked="{Binding DistantCheckBox}" Content="удаленно" HorizontalAlignment="Left" Margin="140,252.6,0,0" VerticalAlignment="Top" Checked="Distant_Checked" Unchecked="Distant_Unchecked" Grid.Row="1"/>
         <CheckBox x:Name="TodayChanges" IsChecked="{Binding TodayChangesCheckBox}" Content="TodayChanges" HorizontalAlignment="Left" Margin="267,252.6,0,0" VerticalAlignment="Top" Checked="TodayChanges_Checked" Unchecked="TodayChanges_Unchecked" Grid.Row="1"/>
         <CheckBox x:Name="Intrst" IsChecked="{Binding IntrstCheckBox}" Content="Intrst" HorizontalAlignment="Left" Margin="216,252.6,0,0" VerticalAlignment="Top" Checked="Intrst_Checked" Unchecked="Intrst_Unchecked" Grid.Row="1"/>
@@ -211,6 +218,11 @@
         </RichTextBox>
 
         <Label x:Name="Alert" HorizontalAlignment="Left" Height="48" Margin="791,66,0,0" Content="" VerticalAlignment="Top" Width="306" Foreground="#FFDA1695" FontSize="36" FontWeight="Bold" BorderBrush="{x:Null}" Background="{x:Null}"/>
+        <CheckBox x:Name="chbOnlyFromName" Content="" HorizontalAlignment="Left" Margin="1142,8,0,0" VerticalAlignment="Top">
+            <CheckBox.ContextMenu>
+                <ContextMenu/>
+            </CheckBox.ContextMenu>
+        </CheckBox>
 
 
 

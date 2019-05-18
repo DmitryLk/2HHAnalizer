@@ -43,7 +43,7 @@ namespace WpfApp1
         string AnyTextString { get; set; }
         double PBmax { get; set; }
         void SpisokView(ICollectionView SpisokFiltered);
-        void YapView(ObservableCollection<q> qs);
+        void YapView(ObservableCollection<AnaliseType> qs);
         void PB_Update(MyEventArgs e);
 
         event EventHandler<MyEventArgs> AutoClick;
@@ -138,7 +138,7 @@ namespace WpfApp1
         private void Button1_Click(object sender, RoutedEventArgs e)  // Analize
         {
             Button1.IsEnabled = false;
-            Presentier.AnalizeAsync();
+            Presentier.AnalizeAsync((bool)chbOnlyFromName.IsChecked);
         }
 
         private async void Button3_Click(object sender, RoutedEventArgs e)  //LoadFromWeb
@@ -408,10 +408,14 @@ namespace WpfApp1
             //}
         }
 
-        public void YapView(ObservableCollection<q> yap)
+        public void YapView(ObservableCollection<AnaliseType> yap)
         {
+            listbox1.ItemsSource = null;
             listbox1.ItemsSource = yap;
+            //listbox1.Refresh();
+            listbox1.Items.SortDescriptions.Clear();
             Button1.IsEnabled = true;
+            AdornerLayer.GetAdornerLayer(listViewSortCol).Remove(listViewSortAdorner);
         }
 
         public void PB_Update(MyEventArgs e)
@@ -604,7 +608,7 @@ namespace WpfApp1
             //}
             //string[] list = new string[] { "1", "2", "3" };
             //listbox1.ItemsSource = yap;
-            //(listbox1.ItemsSource as ObservableCollection<q>).RemoveAt(0);
+            //(listbox1.ItemsSource as ObservableCollection<AnaliseType>).RemoveAt(0);
             //binding.ElementName = "myTextBox"; // элемент-источник
             //binding.Path = new PropertyPath("Text"); // свойство элемента-источника
             //myTextBlock.SetBinding(TextBlock.TextProperty, binding); // установка привязки для элемента-приемника
@@ -615,9 +619,9 @@ namespace WpfApp1
             //listBox1.SetBinding(ListBox.ItemsSourceProperty, binding);
             //(listBox1.ItemsSource as ObservableCollection<string>).RemoveAt(0);
             //yap[2].count = spisok.Count(t => t.Name.Contains("Java"));
-            //ObservableCollection<q> yap = new ObservableCollection<q>();
+            //ObservableCollection<AnaliseType> yap = new ObservableCollection<AnaliseType>();
             //int size = numbers.Count(i => i % 2 == 0 && i > 10);
-            //yap.ForEach<q>(p => p.count2 = p.Name);
+            //yap.ForEach<AnaliseType>(p => p.count2 = p.Name);
             //++.ToList().ForEach(p => p.count = spisok.Count(t => t.Name.Contains(p.Name)));
             //yap.ToList().Sort();
             //List<int> yap2 = new List<int>();
@@ -631,8 +635,8 @@ namespace WpfApp1
             //worker.WorkerReportsProgress = true;
             //worker.ProgressChanged += worker_ProgressChanged;
 
-                //yap.ForEach<q>(p => p.count = spisok.Count(t => t.AllInfo().ContainsCI(p.Name)));
-            //foreach (q p in yap)
+                //yap.ForEach<AnaliseType>(p => p.count = spisok.Count(t => t.AllInfo().ContainsCI(p.Name)));
+            //foreach (AnaliseType p in yap)
             //{
             //    p.count = spisok.Count(t => t.AllInfo().ContainsCI(p.Name) || t.AllInfo().ContainsCI(p.NameRus()));
             //}
@@ -701,7 +705,7 @@ namespace WpfApp1
             //Task<List<Record>> task;
             //task = Task<List<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader), TaskCreationOptions.LongRunning);
             //Spisok = await task;
-            //ObservableCollection<q> yap;
+            //ObservableCollection<AnaliseType> yap;
             //yap = await Task.Run(() => Model.AnalizeAsync());
             //View.YapView(yap);
             //Task<List<Record>> task = new Task<List<Record>>(() => Model.LoadAsync(xlsloader));

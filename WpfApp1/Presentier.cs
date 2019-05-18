@@ -38,7 +38,7 @@ namespace WpfApp1
         Task LoadFromXLS(SynchronizationContext SC);
         Task SaveToXLS();
         Task LoadFromWeb(string webs, WebBrowser wb, SynchronizationContext SC);
-        Task AnalizeAsync();
+        Task AnalizeAsync(bool onlyFromNames);
         void Cancel();
         void CheckBoxesFilterUpdate(object sender);
 
@@ -59,7 +59,7 @@ namespace WpfApp1
         public bool ClosedCheckBox { get; set; }
         public bool? SharpCheckBox { get; set; }
         public bool? JavaScriptCheckBox { get; set; }
-        public bool? SQLCheckBox { get; set; }
+        public bool? FrontCheckBox { get; set; }
         public bool? oneCCheckBox { get; set; }
         public bool DistantCheckBox { get; set; }
         public bool TodayChangesCheckBox { get; set; }
@@ -83,7 +83,7 @@ namespace WpfApp1
             ClosedCheckBox = true;
             SharpCheckBox = null;
             JavaScriptCheckBox = null;
-            SQLCheckBox = null;
+            FrontCheckBox = null;
             oneCCheckBox = null;
             AnyTextCheckBox = null;
 
@@ -113,18 +113,36 @@ namespace WpfApp1
         }
 
 
+        string[] _frontString = new string[] { "фронт", "front", "script", "react", "angular", "vue", "веб", "web" };
         private bool Filter(Record rec)
         {
             string anytext;
             string[] words;
             string searchString;
             bool anyTextBool;
+            bool flFront;
 
 
             if (JavaScriptCheckBox==true && rec.JavaScript == false || JavaScriptCheckBox == false && rec.JavaScript == true) return false;
 
             if (SharpCheckBox == true && rec.Sharp == false || SharpCheckBox == false && rec.Sharp == true) return false;
-            if (SQLCheckBox == true && rec.SQL == false || SQLCheckBox == false && rec.SQL == true) return false;
+
+
+            if (FrontCheckBox != null)
+            {
+                flFront = false;
+                foreach (var word in _frontString)
+                {
+                    if (rec.Name.ContainsCI(word))
+                        flFront = true;
+                }
+                if (FrontCheckBox == true && flFront == false || FrontCheckBox == false && flFront == true) return false;
+            }
+
+
+
+
+
             if (oneCCheckBox == true && rec._1C == false || oneCCheckBox == false && rec._1C == true) return false;
 
 
@@ -227,10 +245,10 @@ namespace WpfApp1
             _tokensource.Cancel();
         }
 
-        public async Task AnalizeAsync()
+        public async Task AnalizeAsync(bool onlyFromNames)
         {
-            ObservableCollection<q> yap;
-            yap = await Task.Run(() => Model.AnalizeAsync(GetFilteredData()));
+            ObservableCollection<AnaliseType> yap;
+            yap = await Task.Run(() => Model.AnalizeAsync(GetFilteredData(), onlyFromNames));
             View.YapView(yap);
         }
 
@@ -265,10 +283,10 @@ namespace WpfApp1
             string[] redwords = new string[] { "1C", "1С", "Angular", "AngularJS", "D3.js", "es5", "es6", "ExtJS", "JavaScript", "jQuery", "js", "linux", "marionettejs", "MongoDB", "Node.js", "PHP", "powershell", "Python", "React", "sharepoint", "typescript", "ubuntu", "unity", "unity3d", "unix", "Vue.js", "xquery" };
 
 
-            ObservableCollection<q> MyQ = Model.GetQData();
+            ObservableCollection<AnaliseType> MyQ = Model.GetQData();
 
 
-            foreach (q word in MyQ)
+            foreach (AnaliseType word in MyQ)
             {
                 position = flowDocument.ContentStart;
                 flag = true;

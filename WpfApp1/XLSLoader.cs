@@ -100,6 +100,7 @@ namespace WpfApp1
             range = workSheet.get_Range("A1", Missing.Value);
             range = range.get_End(Excel.XlDirection.xlToRight);
             k = range.Column;
+            k = 22;
 
             range = workSheet.get_Range((Excel.Range)workSheet.Cells[2, 1], (Excel.Range)workSheet.Cells[j + 1, k]);
             tmp = range.Value2;
@@ -116,6 +117,7 @@ namespace WpfApp1
             args.Value2 = 0;
             Changed?.Invoke(this, args);
 
+            int iView = 0;
             for (i = 1; i <= j; i++)
             {
                 rec = new Record();
@@ -157,15 +159,23 @@ namespace WpfApp1
                 if (rec.BeginingDate < rec.Dat) rec.DaysLong = (rec.LastCheckDate - rec.BeginingDate).TotalDays; else rec.DaysLong = (rec.LastCheckDate - rec.Dat).TotalDays;
 
                 if (k > 20) rec.Interes = Convert.ToBoolean(tmp[i, 21]); else rec.Interes = false;
+                if (k > 20) rec.Rating = tmp[i, 22]?.ToString(); else rec.Rating = "";
 
 
                 //SC.Post(new SendOrPostCallback(o => { Spisok.Add(rec); }), 1);
                 Spisok.Add(rec);
 
                 args.Value = i;
-                Changed?.Invoke(this, args);
 
-                await Task.Delay(1);
+                if (++iView == 30)
+                {
+                    Changed?.Invoke(this, args);
+                    await Task.Delay(1);
+                    iView = 0;
+                }
+            
+
+                //
 
                 //Application.Current.Dispatcher.BeginInvoke(new Action(() => { PB.Value= ++value; }));
                 //System.Threading.Thread.Sleep(10);

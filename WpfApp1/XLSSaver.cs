@@ -60,7 +60,7 @@ namespace WpfApp1
             excelApp = new Excel.Application();
 
 
-            var data = new object[Spisok.Count+1, 21];
+            var data = new object[Spisok.Count+1, 22];
             
 
 
@@ -139,6 +139,7 @@ namespace WpfApp1
             data[0, 19] = "Период";
             data[0, 19] = "Период";
             data[0, 20] = "Интерес";
+            data[0, 21] = "Оценка";
 
 
 
@@ -172,6 +173,7 @@ namespace WpfApp1
                 if (rec.BeginingDate < rec.Dat) data[i, 19] = (rec.LastCheckDate - rec.BeginingDate).TotalDays; else data[i, 19] = (rec.LastCheckDate - rec.Dat).TotalDays;
 
                 data[i, 20] = rec.Interes;
+                data[i, 21] = rec.Rating;
 
 
                 //workSheet.Rows[i].RowHeight = 15;
@@ -186,7 +188,7 @@ namespace WpfApp1
 
 
             range1 = (Excel.Range)workSheet.Cells[1, 1];
-            range2 = (Excel.Range)workSheet.Cells[Spisok.Count + 1, 21];
+            range2 = (Excel.Range)workSheet.Cells[Spisok.Count + 1, 22];
             range = workSheet.Range[range1, range2];
 
             range.Value2 = data;

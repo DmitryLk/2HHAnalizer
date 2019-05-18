@@ -27,13 +27,13 @@ namespace WpfApp1
         public event EventHandler<MyEventArgs> EndPause = delegate { };
 
         private readonly string webs;
-        private WebBrowser wb { get; }
+        private WebBrowser Wb { get; }
         private readonly SynchronizationContext SC;
 
         public WebLoader(string webs, WebBrowser wb, SynchronizationContext SC)
         {
             this.webs = webs;
-            this.wb = wb;
+            this.Wb = wb;
             this.SC = SC;
         }
 
@@ -71,7 +71,7 @@ namespace WpfApp1
             HtmlDocument hDocument = null;
             object doc1 = null;
 
-            doc1 = await wb.NavigateAsync(link, SC);
+            doc1 = await Wb.NavigateAsync(link, SC);
 
             if (doc1 is mshtml.IHTMLDocument2)
             {
@@ -94,7 +94,6 @@ namespace WpfApp1
 
         public async Task Load(IList<Record> Spisok, CancellationToken token, IModel m)
         {
-            int _p;
             HtmlNodeCollection nodes;
             HtmlNode root;
             HtmlDocument document2, hDocument;
@@ -104,7 +103,6 @@ namespace WpfApp1
             MyEventArgs args = new MyEventArgs();
             Random rnd = new Random();
             StringBuilder SBDesc = new StringBuilder();
-            DateTime tmpDate;
             string tmpString;
             char searchChar1, searchChar2;
 
@@ -128,10 +126,10 @@ namespace WpfApp1
             text = hDocument.DocumentNode.SelectSingleNode("//div[@data-qa='vacancies-total-found']")?.InnerText ?? "";
             text = Regex.Match(text, @"\d+").Value;
 
-            if (!Int32.TryParse(text, out _p))
+            if (!Int32.TryParse(text, out int _p))
             {
                 searchChar1 = '&'; searchChar2 = '=';
-                
+
                 text = hDocument.DocumentNode.SelectSingleNode("//h1[@class='header' and @data-qa='page-title']")?.InnerText ?? "";
                 text = Regex.Replace(text, @"<[^>]+>|&nbsp;", "").Trim();
                 text = Regex.Replace(text, @" ", "").Trim();
@@ -140,7 +138,7 @@ namespace WpfApp1
 
             }
 
-       
+
 
 
 
@@ -165,19 +163,21 @@ namespace WpfApp1
                     if (rec2 == null)
                     {
                         // Новая запись
-                        rec = new Record();
-                        rec.Name = node.SelectSingleNode(".//div[@class='resume-search-item__name']")?.InnerText ?? "";
-                        rec.link = node.SelectSingleNode(".//a[@class='bloko-link HH-LinkModifier']")?.Attributes["href"].Value;
-                        rec.Zp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__compensation']")?.InnerText ?? "";
-                        rec.Comp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "";
-                        rec.Town = node.SelectSingleNode(".//span[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "";
-                        rec.Resp1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_responsibility']")?.InnerText ?? "";
-                        rec.Req1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_requirement']")?.InnerText ?? "";
+                        rec = new Record
+                        {
+                            Name = node.SelectSingleNode(".//div[@class='resume-search-item__name']")?.InnerText ?? "",
+                            link = node.SelectSingleNode(".//a[@class='bloko-link HH-LinkModifier']")?.Attributes["href"].Value,
+                            Zp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__compensation']")?.InnerText ?? "",
+                            Comp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "",
+                            Town = node.SelectSingleNode(".//span[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "",
+                            Resp1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_responsibility']")?.InnerText ?? "",
+                            Req1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_requirement']")?.InnerText ?? ""
+                        };
 
 
                         tmpString = node.SelectSingleNode(".//span[@class='vacancy-serp-item__publication-date']")?.InnerText ?? "";
                         if (Regex.Match(tmpString, @"\d+").Length == 1) tmpString = "0" + tmpString;
-                        if (DateTime.TryParseExact(Regex.Replace(tmpString, @"\u00A0", " "), "dd MMMMM", null, DateTimeStyles.None, out tmpDate))
+                        if (DateTime.TryParseExact(Regex.Replace(tmpString, @"\u00A0", " "), "dd MMMMM", null, DateTimeStyles.None, out DateTime tmpDate))
                             rec.Dat = tmpDate; 
                         else
                             rec.Dat = DateTime.Now;
@@ -222,7 +222,7 @@ namespace WpfApp1
                         //rec.Desc = XamlWriter.Save(SBDesc.ToString());
                         //rec.Desc = SBDesc.ToString();
                         // Преобразовать SBDesc.ToString() во FlowDocument
-                        //yap.ForEach<q>(p => p.count = spisok.Count(t => t.AllInfo().СontainsCI(p.Name) || t.AllInfo().СontainsCI(p.NameRus())));
+                        //yap.ForEach<AnaliseType>(p => p.count = spisok.Count(t => t.AllInfo().СontainsCI(p.Name) || t.AllInfo().СontainsCI(p.NameRus())));
                         rec.Sharp = rec.AllInfo().ContainsCI("C#") || rec.AllInfo().ContainsCI("С#") || rec.AllInfo().ContainsCI(".NET");
                         rec.JavaScript = rec.AllInfo().ContainsCI("JavaScript");
                         rec.SQL = rec.AllInfo().ContainsCI("SQL");
@@ -349,7 +349,7 @@ namespace WpfApp1
                     }
 
 
-                    //yap.ForEach<q>(p => p.count = spisok.Count(t => t.AllInfo().СontainsCI(p.Name) || t.AllInfo().СontainsCI(p.NameRus())));
+                    //yap.ForEach<AnaliseType>(p => p.count = spisok.Count(t => t.AllInfo().СontainsCI(p.Name) || t.AllInfo().СontainsCI(p.NameRus())));
 
                     rec.Sharp = rec.AllInfo().ContainsCI("C#") || rec.AllInfo().ContainsCI("С#") || rec.AllInfo().ContainsCI(".NET");
                     rec.JavaScript = rec.AllInfo().ContainsCI("JavaScript");
