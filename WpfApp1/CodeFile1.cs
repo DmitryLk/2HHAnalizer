@@ -12,12 +12,10 @@ using System.Windows.Documents;
 
 namespace WpfApp1
 {
-
     public static class ExtensionMethods
 
     {
         private static Action EmptyDelegate = delegate () { };
-
 
         public static void Refresh(this UIElement uiElement)
 
@@ -28,7 +26,6 @@ namespace WpfApp1
 
     public static class WebBrowserExtensions
     {
-
         public static Task<object> NavigateAsync(this WebBrowser wb, string link, SynchronizationContext SC)
         {
             if (wb == null) throw new ArgumentNullException("wb");
@@ -48,7 +45,6 @@ namespace WpfApp1
                 tcs.SetResult(wb.Document);
                 wb.LoadCompleted -= handler1;
                 //wb.Navigated -= handler2;
-
             };
 
             handler2 = (s, e) =>
@@ -61,14 +57,12 @@ namespace WpfApp1
                 }
                 //wb.LoadCompleted -= handler1;
                 wb.Navigated -= handler2;
-
             };
 
             wb.LoadCompleted += handler1;
             wb.Navigated += handler2;
             SC.Post(new SendOrPostCallback(o => { wb.Navigate(link); }), link);
             return tcs.Task;
-
 
             //await Application.Current.Dispatcher.BeginInvoke(new Action(() => { wb.Navigate(link); }));
             //wb.Navigate(new Uri(link));
@@ -93,8 +87,6 @@ namespace WpfApp1
         }
     }
 
-
-
     public static class ExtensionsIEnumerable
     {
         public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
@@ -110,12 +102,9 @@ namespace WpfApp1
     {
         public static bool ContainsCI(this string text, string value, StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
         {
-
-
             return text.IndexOf(value, stringComparison) >= 0;
         }
     }
-
 
     public class MyEventArgs : EventArgs
     {
@@ -137,6 +126,7 @@ namespace WpfApp1
         public string Id { get; set; }
         public string Name { get; set; }
         public string Zp { get; set; }
+        public int? Zp2 { get; set; }
         public string Comp { get; set; }
         public string Town { get; set; }
         public string Resp1 { get; set; }
@@ -151,13 +141,15 @@ namespace WpfApp1
         public bool _1C { get; set; }
         public bool Distant { get; set; }
         public bool Closed { get; set; }
+        public bool NewUpdates { get; set; }
         public DateTime BeginingDate { get; set; }
         public DateTime LastCheckDate { get; set; }
         public double DaysLong { get; set; }
 
-        public bool Interes { get; set; }
+        public bool? Interes { get; set; }
         public string Rating { get; set; }
 
+        public int LanguageIndex { get; set; }
 
         public string AllInfo() => Name + Zp + Comp + Town + Resp1 + Req1 + Dat + Opt + Desc;
     }
@@ -173,5 +165,4 @@ namespace WpfApp1
 
         public string NameRus() => Name.Replace("C", "С");
     }
-
 }

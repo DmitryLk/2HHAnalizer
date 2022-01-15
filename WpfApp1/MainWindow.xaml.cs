@@ -29,52 +29,44 @@ using System.Windows.Controls.Primitives;
 using System.Data;
 using System.Windows.Markup;
 
-
-
 namespace WpfApp1
 {
-
-
-
     public interface IView
     {
         string WebString { get; set; }
         string AlertString { get; set; }
         string AnyTextString { get; set; }
         double PBmax { get; set; }
+
         void SpisokView(ICollectionView SpisokFiltered);
+
         void YapView(ObservableCollection<AnaliseType> qs);
+
         void PB_Update(MyEventArgs e);
 
         event EventHandler<MyEventArgs> AutoClick;
-
-
     }
 
     public partial class MainWindow : Window, IView
     {
-
-
         private IPresentier Presentier;
         private IModel Model;
         private readonly SynchronizationContext SC;
+
         public event EventHandler<MyEventArgs> AutoClick = delegate { };
-
-
-
 
         public string WebString
         {
-            get { return TextBox1.Text; }
-            set { TextBox1.Text = value; }
+            get { return ComboBox1.Text; }
+            set { ComboBox1.Text = value; }
         }
 
         public string AnyTextString
         {
             get
             {
-                string result = null; 
-                SC.Send(new SendOrPostCallback(o =>  {result = AnyTextText.Text; }), null);
+                string result = null;
+                SC.Send(new SendOrPostCallback(o => { result = AnyTextText.Text; }), null);
                 return result;
                 //return AnyTextText.Text;
             }
@@ -90,13 +82,11 @@ namespace WpfApp1
             }
         }
 
-
         public double PBmax
         {
             get { return PB.Maximum; }
             set { PB.Maximum = value; PB.Value = 0; }
         }
-
 
         //====================================================
         public MainWindow()
@@ -106,17 +96,12 @@ namespace WpfApp1
             Presentier = new MyPresentier(this, Model);
             SC = SynchronizationContext.Current;
 
-
             this.DataContext = Presentier;
-
-
 
             //Spisok = Model.GetData();
             //Binding binding = new Binding();
             //binding.Source = Spisok;
             //MyGrid.SetBinding(DataGrid.ItemsSourceProperty, binding);
-
-
 
             //MyGrid.ItemsSource = Spisok;
             //MyGrid.DataContext = Spisok;
@@ -124,11 +109,6 @@ namespace WpfApp1
             //MyGrid.RowStyle.Triggers
 
             //MyGrid.DataContext = this;
-
-
-
-
-
         }
 
         public void Main()
@@ -147,7 +127,7 @@ namespace WpfApp1
             Button6.IsEnabled = true;
             TabControl1.SelectedIndex = 2;
 
-            await Presentier.LoadFromWeb(TextBox1.Text, WebBrowser1, SC);
+            await Presentier.LoadFromWeb(ComboBox1.Text, WebBrowser1, SC);
             //WebBrowser1.Navigate(TextBox1.Text);
             //await Application.Current.Dispatcher.BeginInvoke(new Action(() => { WebBrowser1.Navigate(TextBox1.Text); }));
         }
@@ -178,14 +158,11 @@ namespace WpfApp1
             //SC.Post(new SendOrPostCallback(o => { PBtext.Text = ""; }), e);
             //SC.Post(new SendOrPostCallback(o => { PB.Refresh(); }), e);
 
-
-
             Presentier.Cancel();
         }
 
         private void Bold_Click(object sender, RoutedEventArgs e)  //Cancel
         {
-
             TextPointer potStart = RichTextBox1.Selection.Start;
             TextPointer potEnd = RichTextBox1.Selection.End;
 
@@ -205,7 +182,6 @@ namespace WpfApp1
 
         private void Color_Click(object sender, RoutedEventArgs e)  //Cancel
         {
-
             TextPointer potStart = RichTextBox1.Selection.Start;
             TextPointer potEnd = RichTextBox1.Selection.End;
 
@@ -216,15 +192,12 @@ namespace WpfApp1
             {
                 range = new TextRange(potStart, potEnd);
 
-
                 SolidColorBrush fontBrush = (SolidColorBrush)obj;
-
 
                 if (fontBrush.Color == Brushes.Black.Color)
                     range.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);
 
                 //new SolidColorBrush(GetColorFromString(rule.FontColor, (Brush)tr.GetPropertyValue(TextElement.ForegroundProperty))));
-
 
                 if (fontBrush.Color == Brushes.Red.Color) range.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Black);
                 String text = XamlWriter.Save(RichTextBox1.Document);
@@ -232,20 +205,14 @@ namespace WpfApp1
             }
         }
 
-
         private void Auto_Click(object sender, RoutedEventArgs e)
         {
             MyEventArgs args = new MyEventArgs();
             args.flowDocument = RichTextBox1.Document;
             args.Rec = (Record)MyGrid.SelectedItem;
             if (AutoClick != null) AutoClick(sender, args);
-
-
         }
 
-
-
-    
         //if (++cnt>2)
         //textRun = position.GetTextInRun(LogicalDirection.Forward);
         //cnt = textRun.Length;
@@ -287,7 +254,6 @@ namespace WpfApp1
         //                }
         //            }
 
-
         //                        if (boldWords != null)
         //            {
         //                position = flowDocument.ContentStart;
@@ -309,46 +275,106 @@ namespace WpfApp1
         //}
         //            }
 
-
-
         private void TodayChanges_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void TodayChanges_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void ClosedVacancy_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void ClosedVacancy_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void Sharp_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void Sharp_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void JavaScript_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void JavaScript_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void SQL_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void SQL_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void oCwo_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void oCwo_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void Distant_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void Distant_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void ActiveVacancy_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void ActiveVacancy_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void Intrst_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void Intrst_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+        private void Intrst_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void AnyText_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void AnyText_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
 
+        private void BigZP_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
 
+        private void BigZP_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void internation_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void internation_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
 
         private void JavaScript_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void Sharp_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void SQL_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void oCwo_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
         private void AnyText_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
 
+        private void Moscow_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
 
+        private void Moscow_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Moscow_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Spb_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Spb_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Spb_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Rostov_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Rostov_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Rostov_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Krasnodar_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Krasnodar_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Krasnodar_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Java_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Java_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void Java_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void PHP_Checked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void PHP_Unchecked(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void PHP_Indeterminate(object sender, RoutedEventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
+
+        private void LangComboBox_DropDownClosed(object sender, EventArgs e) => Presentier.CheckBoxesFilterUpdate(sender);
 
         //private void JavaScript_Checked(object sender, RoutedEventArgs e) => MessageBox.Show(JavaScript.IsChecked.ToString());
         //private void JavaScript_Unchecked(object sender, RoutedEventArgs e) => MessageBox.Show(JavaScript.IsChecked.ToString());
         //private void JavaScript_Indeterminate(object sender, RoutedEventArgs e) => MessageBox.Show(JavaScript.IsChecked.ToString());
-
-
-
-
 
         //private void Test_Click(object sender, RoutedEventArgs e)
         //{
@@ -369,9 +395,6 @@ namespace WpfApp1
                 RichTextBox1.Document = flowDocument;
             }
         }
-
-
-
 
         public void SpisokView(ICollectionView SpisokFiltered)
         {
@@ -430,10 +453,9 @@ namespace WpfApp1
 
         //====================================================
 
-
-
         private GridViewColumnHeader listViewSortCol = null;
         private SortAdorner listViewSortAdorner = null;
+
         private void LBColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             GridViewColumnHeader column = (sender as GridViewColumnHeader);
@@ -460,7 +482,6 @@ namespace WpfApp1
             //SortDescription sd = new SortDescription(sortBy, newDir);
             //dataView.SortDescriptions.Add(sd);
             //dataView.Refresh();
-
         }
 
         private void MyGrid_LoadingRow(object sender, DataGridRowEventArgs e)
@@ -473,7 +494,6 @@ namespace WpfApp1
             //TextPointer position = RichTextBox1.Document.ContentStart;
             //String word = "Требования";
             //String t = new TextRange(RichTextBox1.Document.ContentStart, RichTextBox1.Document.ContentEnd).Text;
-
 
             //while (position != null)
             //{
@@ -495,8 +515,6 @@ namespace WpfApp1
 
             //    position = position.GetNextContextPosition(LogicalDirection.Forward);
             //}
-
-
 
             //string keyword = "Требования";
             //string newString = "!!!!NewString!!!!";
@@ -522,13 +540,10 @@ namespace WpfApp1
             //    current = current.GetNextContextPosition(LogicalDirection.Forward);
             //}
 
-
-
             //TextRange textRange = new TextRange(RichTextBox1.Document.ContentStart, RichTextBox1.Document.ContentEnd);
             //textRange.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Red);
 
-            //TextRange tr = new TextRange(RichTextBox1.Document.ContentStart), RichTextBox1.Document.ContentEnd); 
-
+            //TextRange tr = new TextRange(RichTextBox1.Document.ContentStart), RichTextBox1.Document.ContentEnd);
 
             //if (RichTextBox1.Document.Text.Contains("прогр"))
             //{
@@ -536,7 +551,6 @@ namespace WpfApp1
             //    RichTextBox1.SelectionColor = Color.Aqua;
             //}
         }
-
 
         public class SortAdorner : Adorner
         {
@@ -577,18 +591,20 @@ namespace WpfApp1
 
         private void TextBox1_TextChanged(object sender, TextChangedEventArgs e)
         {
-
         }
 
         private void AnyTextText_TextChanged(object sender, TextChangedEventArgs e)
         {
+        }
 
+        private void LangComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
         }
     }
 }
 
 /*
- * 
+ *
  *   //class MyWebClient : WebClient
     //{
     //    protected override WebRequest GetWebRequest(Uri address)
@@ -598,8 +614,6 @@ namespace WpfApp1
     //        return request;
     //    }
     //}
-
-
 
                 //Array.ForEach(yap,  s => listbox1.Items.Add(s));
             //foreach (string s in yap)
@@ -630,7 +644,6 @@ namespace WpfApp1
             //{
             //    using (var client = new HttpClient(handler))
             //    {
-
                 //worker.RunWorkerCompleted += new DoWorkEventHandler(worker_RunWorkerCompleted);
             //worker.WorkerReportsProgress = true;
             //worker.ProgressChanged += worker_ProgressChanged;
@@ -674,7 +687,6 @@ namespace WpfApp1
 
         private void Button4_Click(object sender, RoutedEventArgs e)
         {
-
             string urlStr = TextBox1.Text;
             try
             {
@@ -687,7 +699,6 @@ namespace WpfApp1
                 // do stuff
             }
             catch { }
-
         }
  *         //= (x, y) => Math.Sqrt(x * x + y * y);
         //void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -699,8 +710,7 @@ namespace WpfApp1
 
                 //WebBrowser.LoadCompleted += WebBrowser_LoadCompleted;
 
-
- * 
+ *
  *             //Spisok = await Task.Run( () => Model.LoadAsync(xlsloader));
             //Task<List<Record>> task;
             //task = Task<List<Record>>.Factory.StartNew(() => Model.LoadAsync(xlsloader), TaskCreationOptions.LongRunning);
@@ -752,7 +762,6 @@ namespace WpfApp1
             //listbox1.SetBinding(ListBox.ItemsSourceProperty, binding);
             //listbox1.DataContext = yap;
 
-
                 //MyGrid.ItemsSource = Spisok;
                             //FlowDocument content = XamlReader.Load(text) as FlowDocument;
 
@@ -771,6 +780,5 @@ namespace WpfApp1
 
                 //range.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
 
-
- * * 
+ * *
  */

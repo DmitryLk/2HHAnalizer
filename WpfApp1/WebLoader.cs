@@ -16,25 +16,27 @@ using System.Windows.Markup;
 using System.Windows.Documents;
 using System.Windows;
 
-
 namespace WpfApp1
 {
-
-    class WebLoader : CommonLoader, ILoader
+    internal class WebLoader : CommonLoader, ILoader
     {
         public event EventHandler<MyEventArgs> Changed = delegate { };
+
         public event EventHandler<MyEventArgs> StartPause = delegate { };
+
         public event EventHandler<MyEventArgs> EndPause = delegate { };
 
         private readonly string webs;
         private WebBrowser Wb { get; }
         private readonly SynchronizationContext SC;
+        private readonly HtmlByUriChromiumGetter _htmlByUriChromiumGetter;
 
         public WebLoader(string webs, WebBrowser wb, SynchronizationContext SC)
         {
             this.webs = webs;
             this.Wb = wb;
             this.SC = SC;
+            _htmlByUriChromiumGetter = new HtmlByUriChromiumGetter();
         }
 
         //private async Task<HtmlDocument> GetDocument2(string link)
@@ -45,12 +47,9 @@ namespace WpfApp1
 
         //    //MyWaitable wbwait = new MyWaitable();
 
-
         //    MyWebBrowserAwaitable PageLoading = new MyWebBrowserAwaitable(wb);
         //    wb.Navigate(new Uri(link));
         //    doc1 = await PageLoading;
-
-
 
         //    //mshtml.IHTMLDocument2 doc2 = wb.Document as mshtml.IHTMLDocument2;
         //    mshtml.IHTMLDocument2 doc2 = doc1 as mshtml.IHTMLDocument2;
@@ -65,7 +64,7 @@ namespace WpfApp1
         //https://krasnodar.hh.ru/search/vacancy?area=1&clusters=true&enable_snippets=true&specialization=1.221&page=1
         //https://krasnodar.hh.ru/search/vacancy?area=1&clusters=true&enable_snippets=true&specialization=1.221&page-1
 
-        private async Task<HtmlDocument> GetDocument(string link)
+        private async Task<HtmlDocument> GetDocument2(string link)
         {
             string HTML;
             HtmlDocument hDocument = null;
@@ -91,6 +90,12 @@ namespace WpfApp1
             //await wb.NavigateAsync(link, SC);
         }
 
+        private async Task<HtmlDocument> GetDocument(string link)
+        {
+            var hDocument = await _htmlByUriChromiumGetter.GetHtml(link);
+
+            return hDocument;
+        }
 
         public async Task Load(IList<Record> Spisok, CancellationToken token, IModel m)
         {
@@ -112,8 +117,6 @@ namespace WpfApp1
             //web = new HtmlWeb();
             //document = web.Load(webs);
 
-
-
             args.Value = 0;
             args.Value2 = 0;
             Changed?.Invoke(this, args);
@@ -122,36 +125,35 @@ namespace WpfApp1
 
             hDocument = await GetDocument(webs);
 
-            searchChar1 = '/'; searchChar2 = '-';
-            text = hDocument.DocumentNode.SelectSingleNode("//div[@data-qa='vacancies-total-found']")?.InnerText ?? "";
+            searchChar1 = '?'; searchChar2 = '=';
+            text = hDocument.DocumentNode.SelectSingleNode("//span[@data-qa='vacancies-total-found']")?.InnerText ?? "";
             text = Regex.Match(text, @"\d+").Value;
 
             if (!Int32.TryParse(text, out int _p))
             {
                 searchChar1 = '&'; searchChar2 = '=';
 
-                text = hDocument.DocumentNode.SelectSingleNode("//h1[@class='header' and @data-qa='page-title']")?.InnerText ?? "";
+                text = hDocument.DocumentNode.SelectSingleNode("//h1[@data-qa='bloko-header-3']")?.InnerText ?? "";
                 text = Regex.Replace(text, @"<[^>]+>|&nbsp;", "").Trim();
                 text = Regex.Replace(text, @" ", "").Trim();
                 text = Regex.Match(text, @"\d+").Value;
                 if (!Int32.TryParse(text, out _p)) throw new ArgumentException("Vacancy count error");
-
             }
-
-
-
-
 
             args.MaxValue = _p;
 
             _p = 0;
-            nodes = hDocument.DocumentNode.SelectNodes("//div[@class='vacancy-serp-item ' or @class='vacancy-serp-item  vacancy-serp-item_premium']");
+            nodes = hDocument.DocumentNode.SelectNodes("//div[@class='vacancy-serp-item' or @class='vacancy-serp-item vacancy-serp-item_premium']");
             while (nodes != null)
             {
                 foreach (HtmlNode node in nodes)
                 {
-                    text = node.SelectSingleNode(".//script[@data-name='HH/VacancyResponsePopup/VacancyResponsePopup']")?.Attributes["data-params"]?.Value ?? "0";
-                    text = Regex.Match(text, @"(?<=vacancyId....)\d+").Value;
+                    //text = node.SelectSingleNode(".//script[@data-name='HH/VacancyResponsePopup/VacancyResponsePopup']")?.Attributes["data-params"]?.Value ?? "0";
+
+                    text = node.SelectSingleNode(".//a[@data-qa='vacancy-serp__vacancy_response']")?.Attributes["href"]?.Value ?? "0";
+
+
+                    text = Regex.Match(text, @"(?<=vacancyId.*)\d+").Value;
 
                     // теперь надо узнать есть ли уже такой Id в Spisok
                     rec2 = null;
@@ -165,20 +167,23 @@ namespace WpfApp1
                         // Новая запись
                         rec = new Record
                         {
-                            Name = node.SelectSingleNode(".//div[@class='resume-search-item__name']")?.InnerText ?? "",
-                            link = node.SelectSingleNode(".//a[@class='bloko-link HH-LinkModifier']")?.Attributes["href"].Value,
-                            Zp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__compensation']")?.InnerText ?? "",
-                            Comp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "",
-                            Town = node.SelectSingleNode(".//span[@class='vacancy-serp-item__meta-info']")?.InnerText ?? "",
+                            Name = node.SelectSingleNode(".//a[@class='bloko-link']")?.InnerText ?? "",
+                            link = node.SelectSingleNode(".//a[@class='bloko-link']")?.Attributes["href"].Value,
+                            Zp = node.SelectSingleNode(".//span[@data-qa='vacancy-serp__vacancy-compensation']")?.InnerText ?? "",
+                            Comp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__meta-info-company']")?.InnerText ?? "",
+                            Town = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy-address']")?.InnerText ?? "",
                             Resp1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_responsibility']")?.InnerText ?? "",
-                            Req1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_requirement']")?.InnerText ?? ""
+                            Req1 = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy_snippet_requirement']")?.InnerText ?? "",
+                            Interes = null
                         };
 
+                        rec.Zp2 = ExtractZp(rec.Zp);
 
-                        tmpString = node.SelectSingleNode(".//span[@class='vacancy-serp-item__publication-date']")?.InnerText ?? "";
+                        tmpString = node.SelectSingleNode(".//span[@class='vacancy-serp-item__publication-date vacancy-serp-item__publication-date_long']")?.InnerText ?? "";
+
                         if (Regex.Match(tmpString, @"\d+").Length == 1) tmpString = "0" + tmpString;
                         if (DateTime.TryParseExact(Regex.Replace(tmpString, @"\u00A0", " "), "dd MMMMM", null, DateTimeStyles.None, out DateTime tmpDate))
-                            rec.Dat = tmpDate; 
+                            rec.Dat = tmpDate;
                         else
                             rec.Dat = DateTime.Now;
 
@@ -189,20 +194,17 @@ namespace WpfApp1
                         if (rec.Dat > DateTime.Now)
                             rec.Dat = rec.Dat.AddYears(-1);
 
-
-
                         rec.DaysLong = (rec.LastCheckDate - rec.Dat).TotalDays;
-
 
                         // Случайная пауза.
                         StartPause?.Invoke(this, args);
-                        await Task.Delay(rnd.Next(6000, 15000));
+                        await Task.Delay(rnd.Next(2000, 4000));
                         EndPause?.Invoke(this, args);
 
                         document2 = await GetDocument(rec.link);
                         if (document2 != null)
                         {
-                            rec.Opt = document2.DocumentNode.SelectSingleNode("(//div[@class='bloko-gap bloko-gap_bottom'])[3]")?.InnerText ?? "";
+                            rec.Opt = document2.DocumentNode.SelectSingleNode("(//div[@class='bloko-gap bloko-gap_bottom'])[14]")?.InnerText ?? "";
                             root = document2.DocumentNode.SelectSingleNode("//div[@class='g-user-content' or @data-qa='vacancy-description']");
                             SBDesc.Clear();
                             foreach (HtmlNode node2 in root.DescendantsAndSelf())
@@ -216,8 +218,6 @@ namespace WpfApp1
                             }
                             rec.Desc = ConvertToFlowDocumentString(SBDesc.ToString(), new String[] { "Требования" });
                         }
-
-
 
                         //rec.Desc = XamlWriter.Save(SBDesc.ToString());
                         //rec.Desc = SBDesc.ToString();
@@ -238,8 +238,23 @@ namespace WpfApp1
                     {
                         // Уже есть
                         // rec2 = rec3.First<Record>();
+                        if (string.IsNullOrWhiteSpace(rec2.Comp))
+                        {
+	                        rec2.Comp = node.SelectSingleNode(".//div[@class='vacancy-serp-item__meta-info-company']")?.InnerText ?? "";
+                        }
+                        if (string.IsNullOrWhiteSpace(rec2.Town))
+                        {
+	                        rec2.Town = node.SelectSingleNode(".//div[@data-qa='vacancy-serp__vacancy-address']")?.InnerText ?? "";
+
+                        }
+
                         rec2.LastCheckDate = DateTime.Now;
                         rec2.Closed = false;
+
+                        rec2.NewUpdates = false;
+                        if (rec2.Closed && (DateTime.Now - rec2.LastCheckDate).TotalHours < 36) rec2.NewUpdates = true;
+                        if (!rec2.Closed && (DateTime.Now - rec2.BeginingDate).TotalHours < 12) rec2.NewUpdates = true;
+
                         if (rec2.BeginingDate < rec2.Dat) rec2.DaysLong = (rec2.LastCheckDate - rec2.BeginingDate).TotalDays; else rec2.DaysLong = (rec2.LastCheckDate - rec2.Dat).TotalDays;
                     }
 
@@ -249,30 +264,22 @@ namespace WpfApp1
                     args.Value++;
                     Changed?.Invoke(this, args);
                     token.ThrowIfCancellationRequested();
-
                 }
 
                 // Случайная пауза.
                 StartPause?.Invoke(this, args);
-                await Task.Delay(rnd.Next(6000, 15000));
+                await Task.Delay(rnd.Next(2000, 4000));
                 EndPause?.Invoke(this, args);
 
-
                 hDocument = await GetDocument(webs + searchChar1 + "page" + searchChar2 + ++_p);
-                nodes = hDocument.DocumentNode.SelectNodes("//div[@class='vacancy-serp-item ' or @class='vacancy-serp-item  vacancy-serp-item_premium']");
+                nodes = hDocument.DocumentNode.SelectNodes("//div[@class='vacancy-serp-item' or @class='vacancy-serp-item vacancy-serp-item_premium']");
             }
 
             args.Value = 0;
             args.Value2 = 0;
             Changed?.Invoke(this, args);
             await Task.Delay(100);
-
-
         }
-
-
-    
-
 
         /*
         private void WebBrowser_LoadCompleted(object sender, NavigationEventArgs e)
@@ -293,7 +300,6 @@ namespace WpfApp1
         /*
         public void LoadAsync(List<Record> Spisok)
         {
-
             //UpdateProgressBarDelegate updProgress = new UpdateProgressBarDelegate(PB.SetValue);
 
             int i = 0, p = 0;
@@ -306,10 +312,6 @@ namespace WpfApp1
 
             //double value = 0;
             answer = "";
-
-
-
-
 
             web = new HtmlWeb();
             document = web.Load(webs);
@@ -332,8 +334,6 @@ namespace WpfApp1
 
                     rec.Id = Regex.Match(text, @"\d+").Value;
 
-
-
                     document2 = web.Load(link);
                     rec.Opt = document2.DocumentNode.SelectSingleNode("(//div[@class='bloko-gap bloko-gap_bottom'])[3]")?.InnerText ?? "";
                     root = document2.DocumentNode.SelectSingleNode("//div[@class='g-user-content' or @data-qa='vacancy-description']");
@@ -348,7 +348,6 @@ namespace WpfApp1
                         }
                     }
 
-
                     //yap.ForEach<AnaliseType>(p => p.count = spisok.Count(t => t.AllInfo().СontainsCI(p.Name) || t.AllInfo().СontainsCI(p.NameRus())));
 
                     rec.Sharp = rec.AllInfo().ContainsCI("C#") || rec.AllInfo().ContainsCI("С#") || rec.AllInfo().ContainsCI(".NET");
@@ -356,7 +355,6 @@ namespace WpfApp1
                     rec.Distant = rec.AllInfo().ContainsCI("удал");
 
                     Spisok.Add(rec);
-
 
                     answer += ++i + ". ";
                     answer += "Name: " + rec.Name + "   ";
@@ -378,7 +376,6 @@ namespace WpfApp1
 
                 document = web.Load(webs + "/page-" + ++p);
                 nodes = document.DocumentNode.SelectNodes("//div[@class='vacancy-serp-item ']");
-
             }
         }
         */
@@ -415,7 +412,6 @@ namespace WpfApp1
         //    }
         //};
 
-
         //public class AsyncWebBrowser
 //{
 //    protected WebBrowser m_WebBrowser;
@@ -449,9 +445,6 @@ namespace WpfApp1
 //    }
 //}
 
-
-
-
 //public class MyWaitable
 //{
 //    public WebBrowserAwaiter GetAwaiter() => new WebBrowserAwaiter();
@@ -469,7 +462,6 @@ namespace WpfApp1
 //    {
 //        this.IsCompleted = false;
 //    }
-
 
 //    public void OnCompleted(Action continuation)
 //    {}
@@ -538,20 +530,8 @@ namespace WpfApp1
         {
             View.PBmax = 345;// ReadHHCountVac();
         /*
-            
-
         }
 
-
              */
-
-
-
-
-
     }
-
-
-
-
 }

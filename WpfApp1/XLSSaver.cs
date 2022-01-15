@@ -172,12 +172,14 @@ namespace WpfApp1
 
                 if (rec.BeginingDate < rec.Dat) data[i, 19] = (rec.LastCheckDate - rec.BeginingDate).TotalDays; else data[i, 19] = (rec.LastCheckDate - rec.Dat).TotalDays;
 
-                data[i, 20] = rec.Interes;
+                if (!rec.Interes.HasValue) data[i, 20] = "0";
+                if (rec.Interes == true) data[i, 20] = "1";
+                if (rec.Interes == false) data[i, 20] = "-1";
                 data[i, 21] = rec.Rating;
 
 
                 //workSheet.Rows[i].RowHeight = 15;
-                await Task.Delay(1);
+                if (i%10 == 0) await Task.Delay(1);
                 args.Value = i;
                 Changed?.Invoke(this, args);
 
